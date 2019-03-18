@@ -1,4 +1,4 @@
-/** @file fat_and_fast.hpp
+/** @file beefy.hpp
  * 
  * @author Novoselov Ivan
  * @email  jedi.orden@gmail.com
@@ -84,13 +84,10 @@
  *
  */
 
-#ifndef KCPPT_ALLOCATORS_FAT_AND_FAST_HPP
-#define KCPPT_ALLOCATORS_FAT_AND_FAST_HPP
+#ifndef KCPPT_ALLOCATORS_BEEFY_HPP
+#define KCPPT_ALLOCATORS_BEEFY_HPP
 
-#include "../sequence.hpp"
 #include "../range.hpp"
-#include "../c_array.hpp"
-#include "../debug.hpp"
 
 #include <array>
 #include <cinttypes>
@@ -601,4 +598,4 @@ private:
     
 }
 
-#endif /// KCPPT_ALLOCATORS_FAT_AND_FAST_HPP
+#endif /// KCPPT_ALLOCATORS_BEEFY_HPP
