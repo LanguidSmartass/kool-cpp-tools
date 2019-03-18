@@ -8,7 +8,10 @@
  *         type. Also the templated alias c_array is much cleaner to use
  *         instead of type[size] syntax, especially when you're introducing
  *         references to the array.
- * 
+ *
+ *         There is not much else you can do with a plain array since it can't
+ *         be copied like an object.
+ *         If you need this functionality just use std::array.
  */
 
 #ifndef KCPPT_C_ARRAY_HPP
