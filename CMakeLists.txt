@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 3.13)
 set(CMAKE_CXX_STANDARD 17)
 
 set(library-name kcppt)
-set(project-name lib-${library-name})
+set(project-name ${library-name})
 set(package-config-file ${library-name}-config)
 
 project(
@@ -23,10 +23,6 @@ project(
 
 message("Library name: ${library-name}")
 
-if ("${install-path}" STREQUAL "")
-    message(FATAL_ERROR "Provide 'install-path' variable!")
-endif()
-
 #####################################
 # otherwise lots of 'template with C linkage' errors will occur
 # see this thread: 
@@ -34,7 +30,15 @@ endif()
 set(CMAKE_NO_SYSTEM_FROM_IMPORTED ON)
 #####################################
 
+if (testing)
+    set(install-path "A:/garbage")
+endif()
+
 add_subdirectory(install)
+
+if (testing)
+    include(tests/tests.cmake)
+endif()
 
 unset(package-config-file)
 unset(project-name)

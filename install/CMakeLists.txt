@@ -1,3 +1,7 @@
+if ("${install-path}" STREQUAL "")
+    message(FATAL_ERROR "Provide 'install-path' variable!")
+endif()
+
 set(
     public-cmake-package-config-path
     ${install-path}/${library-name}
