@@ -172,7 +172,7 @@ public:
     constexpr static const char* sdec_f () noexcept {
         static_assert(is_signed_or_pointer<T>);
         return by_size::sdec_f<sizeof(T)>();
-    } 
+    }
     
     template <typename T>
     constexpr static const char* oct_f () noexcept {
