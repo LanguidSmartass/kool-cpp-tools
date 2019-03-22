@@ -97,7 +97,7 @@ namespace kcppt {
 
 namespace allocators {
 
-namespace fat_and_fast {
+namespace beefy {
 
 namespace _implementation {
 
