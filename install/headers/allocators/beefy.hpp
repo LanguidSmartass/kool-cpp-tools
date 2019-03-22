@@ -48,8 +48,9 @@
  *        twice as big as the overhead, but this is purely a personal opinion.
  *
  *        Summing up:
- *        it's fat because of the 5..17 bytes of overhead per single data block
- *        it's fast because this overhead allows the allocator to traverse
+ *        It's beefy because of the 5..17 bytes of overhead per single data
+ *        block.
+ *        It's fast because this overhead allows the allocator to traverse
  *        the control heaps with logN time
  *
  * Usage example:
