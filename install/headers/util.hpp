@@ -87,6 +87,10 @@ using enable_if_class_t =
 std::enable_if_t<traits::is_class_v<V>, V>;
 
 template <typename V>
+using enable_if_integral_t =
+std::enable_if_t<traits::is_integral_v<V>, V>;
+
+template <typename V>
 using enable_if_integral_or_pointer_t =
 std::enable_if_t<traits::is_integral_or_pointer_v<V>, V>;
 
@@ -113,6 +117,13 @@ using enable_if_signed_t = std::enable_if_t<traits::is_signed_v<V>, V>;
 
 template <typename V>
 using enable_if_unsigned_t = std::enable_if_t<traits::is_unsigned_v<V>, V>;
+
+template <typename V>
+using enable_if_floating_point_t =
+    std::enable_if_t<traits::is_floating_point_v<V>, V>;
+
+template <typename V>
+using enable_if_function_t = std::enable_if_t<traits::is_function_v<V>, V>;
 
 
 }

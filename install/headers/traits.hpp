@@ -63,6 +63,12 @@ template <typename V>
 constexpr static auto is_signed_or_pointer_v =
     is_signed_v<V> || std::is_pointer_v<V>;
 
+template <typename V>
+constexpr static auto is_floating_point_v = std::is_floating_point_v<V>;
+
+template <typename V>
+constexpr static auto is_function_v = std::is_function_v<V>;
+
 }
 
 }
