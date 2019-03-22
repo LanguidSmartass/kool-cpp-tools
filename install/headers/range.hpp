@@ -38,7 +38,20 @@ public:
     
     [[nodiscard]]
     constexpr auto operator!= (const iterator& other) noexcept -> bool {
-        return _i != other._i;
+        /// '<' instead of '!=' is intentional,
+        /// otherwise in cases when _step is > 1 range-for loop can
+        /// go past the last index of some container
+        return _i < other._i;
+    }
+    
+    [[nodiscard]]
+    constexpr auto operator<= (const iterator& other) noexcept -> bool {
+        return _i <= other._i;
+    }
+    
+    [[nodiscard]]
+    constexpr auto operator- (const iterator& other) noexcept -> T {
+        return _i - other._i;
     }
     
     [[nodiscard]]
@@ -83,7 +96,7 @@ public:
     constexpr range (T ibegin, T1 iend, T2 istep = 1) noexcept :
     _ibegin(ibegin), _iend(iend), _istep(istep)
     {}
-
+    
 public:
     [[nodiscard]]
     constexpr auto begin () const noexcept -> iterator {
@@ -95,6 +108,10 @@ public:
         return iterator(_iend, _istep);
     }
     
+    [[nodiscard]]
+    constexpr auto step () const noexcept -> T {
+        return _istep;
+    }
 };
 
 /**
