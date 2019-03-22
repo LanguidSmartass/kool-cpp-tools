@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef KCPPT_PRINTS_FMT_HPP
-#define KCPPT_PRINTS_FMT_HPP
+#ifndef KCPPT_IO_FMT_HPP
+#define KCPPT_IO_FMT_HPP
 
 #include "../pow2.hpp"
 #include <cinttypes>
@@ -18,7 +18,7 @@
 
 namespace kcppt {
 
-namespace prints {
+namespace io {
 
 namespace fmt {
 
@@ -250,8 +250,8 @@ constexpr static const char* ptr_HEX_f () noexcept { return ptr_HEX::value; }
 
 } // namespace fmt
 
-} // namespace prints
+} // namespace io
 
 } // namespace kcppt
 
-#endif /// KCPPT_PRINTS_FMT_HPP
+#endif /// KCPPT_IO_FMT_HPP

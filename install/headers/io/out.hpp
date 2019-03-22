@@ -13,16 +13,18 @@
 
 #include <range.hpp>
 #include "printf_light.hpp"
-#include "fmt.hpp"
+#include "io/common/fmt.hpp"
+
+/// TODO: put enable_if-s into a separate headers, they are too generic
 
 namespace kcppt {
 
 namespace prints {
 
-template <class Printf = printf_light<>>
+template <template <typename PutcLambda> class Printf = printf_light>
 class printer {
 private:
-    constexpr static auto _printf = Printf();
+    constexpr static auto _printf = printf_light([](char c) noexcept {std::putchar(c);});
     
 private:
     struct idx {
@@ -40,17 +42,58 @@ private:
      * time.
      * @return A pointer to a string literal.
      */
+    [[nodiscard]]
     constexpr static const char* get_size_t_format () {
-#if __cplusplus >= 201402L
-        constexpr auto sz = sizeof(std::size_t);
-        constexpr auto ret = sz == 8u ? "%" PRIu64 : sz == 4u ? "%" PRIu32 : sz == 2u ? "%" PRIu16 : sz == 1u ? "%" PRIu8 : "";
-        static_assert(ret[0] != '\0', "Error detecting sizeof(std::size_t)");
-        return ret;
-#else
         return fmt_by_size::udec_f<sizeof(std::size_t)>();
-#endif
     }
 
+private:
+    /**
+     * @brief shortcut constants for types
+     */
+    template <typename V>
+    constexpr static auto is_pointer_or_integral =
+        std::is_integral_v<V> || std::is_pointer_v<V>;
+    
+    template <typename V>
+    constexpr static auto is_char = std::is_same_v<V, char>;
+    
+    template <typename V>
+    constexpr static auto is_bool = std::is_same_v<V, bool>;
+    
+    template <typename V>
+    constexpr static auto is_unsigned_char = std::is_same_v<V, unsigned char>;
+    
+    template <typename V>
+    constexpr static auto is_signed =
+        std::is_signed_v<V> && !is_char<V> && !is_bool<V>;
+    
+    template <typename V>
+    constexpr static auto is_unsigned =
+        std::is_unsigned_v<V> && !is_unsigned_char<V> && !is_bool<V>;
+    
+    /**
+     * @brief enable_if shortcut types
+     */
+    template <typename V>
+    using enable_if_ptr_or_integral_t =
+        std::enable_if_t<is_pointer_or_integral<V>, V>;
+    
+    template <typename V>
+    using enable_if_char_t = std::enable_if_t<
+        is_char<V> || is_unsigned_char<V>,
+        V
+    >;
+    
+    template <typename V>
+    using enable_if_bool_t = std::enable_if_t<is_bool<V>, V>;
+    
+    template <typename V>
+    using enable_if_signed_t = std::enable_if_t<is_signed<V>, V>;
+    
+    template <typename V>
+    using enable_if_unsigned_t = std::enable_if_t<is_unsigned<V>, V>;
+    
 public:
     static auto newline_lf  () noexcept { _idx = idx::lf  ; }
     static auto newline_crlf() noexcept { _idx = idx::crlf; }
@@ -68,22 +111,35 @@ public:
         va_end(arglist);
     }
     
+    static auto putc (char c) noexcept {
+        _printf.putchar(c);
+    }
+    
     static auto println () noexcept {
         printer::printf(endl[_idx]);
     }
 
 public:
-    template <typename V>
+    template <typename V, enable_if_char_t<V> = 0>
     static auto print (V v) noexcept {
-        if constexpr (std::is_same_v<V, char>) {
-            printer::printf("%c", v);
-        } else if constexpr (std::is_signed_v<V>) {
-            printer::printf(fmt_by_type::sdec_f<V>(), v);
-        } else {
-            printer::printf(fmt_by_type::udec_f<V>(), v);
-        }
+        putc(v);
     }
     
+    template <typename V, enable_if_signed_t<V> = 0>
+    static auto print (V v) noexcept {
+        printer::printf(fmt_by_type::sdec_f<V>(), v);
+    }
+
+    template <typename V, enable_if_unsigned_t<V> = 0>
+    static auto print (V v) noexcept {
+        printer::printf(fmt_by_type::udec_f<V>(), v);
+    }
+
+    template <typename V, enable_if_bool_t<V> = 0>
+    static auto print (V v) noexcept {
+        printer::printf(v ? "true" : "false");
+    }
+
     template <typename V>
     static auto print (V* v) noexcept {
         printer::printf(fmt::ptr_HEX_f(), v);
@@ -95,10 +151,6 @@ public:
     
     static auto print (const char* str) noexcept {
         printer::printf(str);
-    }
-    
-    static auto print (bool b) noexcept {
-        printer::printf(b ? "true" : "false");
     }
     
     template <typename PT0, typename PT1, typename ... PTs>
@@ -115,13 +167,20 @@ public:
     }
 
 private:
-    template <typename V>
+    template <
+        typename V,
+        typename = std::enable_if_t<is_pointer_or_integral<V>>
+    >
     using always_integral = std::conditional_t<
         std::is_pointer_v<V>, std::uintptr_t, V
     >;
     
-    template <typename V>
-    constexpr static auto integral_cast (V v) {
+    template <
+        typename V,
+        typename = std::enable_if_t<is_pointer_or_integral<V>>
+    >
+    [[nodiscard]]
+    constexpr static auto integral_cast (V v) -> always_integral<V> {
         if constexpr (std::is_pointer_v<V>) {
             return reinterpret_cast<std::uintptr_t>(v);
         } else {
@@ -131,48 +190,48 @@ private:
     
 public: /// Output format modifier objects
     template <typename V>
-    class hex {
+    class [[nodiscard]] hex {
         friend printer;
     private:
         always_integral<V> _v;
     public:
-        explicit hex (V v) : _v(integral_cast(v)) {}
+        constexpr explicit hex (V v) : _v(integral_cast(v)) {}
     };
     
     template <typename V>
-    class HEX {
+    class [[nodiscard]] HEX {
         friend printer;
     private:
         always_integral<V> _v;
     public:
-        explicit HEX (V v) : _v(integral_cast(v)) {}
+        constexpr explicit HEX (V v) : _v(integral_cast(v)) {}
     };
     
     template <typename V>
-    class oct {
+    class [[nodiscard]] oct {
         friend printer;
     private:
         always_integral<V> _v;
     public:
-        explicit oct (V v) : _v(integral_cast(v)) {}
+        constexpr explicit oct (V v) : _v(integral_cast(v)) {}
     };
     
     template <typename V>
-    class udec {
+    class [[nodiscard]] udec {
         friend printer;
     private:
         always_integral<V> _v;
     public:
-        explicit udec (V v) : _v(integral_cast(v)) {}
+        constexpr explicit udec (V v) : _v(integral_cast(v)) {}
     };
     
     template <typename V>
-    class sdec {
+    class [[nodiscard]] sdec {
         friend printer;
     private:
         always_integral<V> _v;
     public:
-        explicit sdec (V v) : _v(integral_cast(v)) {}
+        constexpr explicit sdec (V v) : _v(integral_cast(v)) {}
     };
 
 public: /// Output format modifier users,
@@ -215,8 +274,9 @@ public:
         std::size_t _w;
         
     public:
-        pad (V v, justify j = justify::left, char p = ' ', std::size_t w = 0)
-        noexcept :
+        constexpr pad (
+            V v, justify j = justify::left, char p = ' ', std::size_t w = 0
+        ) noexcept :
             _v(v), _j(j), _p(p), _w(w)
         {}
     };
@@ -230,8 +290,11 @@ private:
         }
     }
     
-    template <std::size_t Div, typename V>
-    static auto _value_print_length (V v) noexcept -> std::size_t {
+    template <typename V>
+    [[nodiscard]]
+    constexpr static auto _value_print_length (
+        V v, std::size_t div
+    ) noexcept -> std::size_t {
         if (v == 0) {
             return 1u;
         }
@@ -239,55 +302,79 @@ private:
         if constexpr (std::is_signed_v<V>) {
             if (v < 0) {
                 v *= -1;
-                ++cnt;
             }
         }
         while (v) {
-            v /= Div;
+            v /= div;
             ++cnt;
         }
         return cnt;
     }
     
-    template <typename V>
-    static auto _value_print_length (const hex<V>& v) noexcept {
-        return _value_print_length<16u>(v._v);
+    template <
+        typename V,
+        typename = std::enable_if_t<is_pointer_or_integral<V>>
+    >
+    [[nodiscard]]
+    constexpr static auto _value_print_length (V v) noexcept {
+        return _value_print_length(v, 10u);
     }
     
     template <typename V>
-    static auto _value_print_length (const HEX<V>& v) noexcept {
-        return _value_print_length<16u>(v._v);
+    [[nodiscard]]
+    constexpr static auto _value_print_length (const hex<V>& v) noexcept {
+        return _value_print_length(v._v, 16u);
     }
     
     template <typename V>
-    static auto _value_print_length (const oct<V>& v) noexcept {
-        return _value_print_length<8u>(v._v);
+    [[nodiscard]]
+    constexpr static auto _value_print_length (const HEX<V>& v) noexcept {
+        return _value_print_length(v._v, 16u);
     }
     
     template <typename V>
-    static auto _value_print_length (const sdec<V>& v) noexcept {
-        return _value_print_length<10u>(v._v);
+    [[nodiscard]]
+    constexpr static auto _value_print_length (const oct<V>& v) noexcept {
+        return _value_print_length(v._v, 8u);
     }
     
     template <typename V>
-    static auto _value_print_length (const udec<V>& v) noexcept {
-        return _value_print_length<10u>(v._v);
+    [[nodiscard]]
+    constexpr static auto _value_print_length (const sdec<V>& v) noexcept {
+        return _value_print_length(v._v, 10u);
+    }
+    
+    template <typename V>
+    [[nodiscard]]
+    constexpr static auto _value_print_length (const udec<V>& v) noexcept {
+        return _value_print_length(v._v, 10u);
+    }
+    
+    template <typename V>
+    [[nodiscard]]
+    constexpr static auto _value_print_sign_and_reverse (V& v) noexcept {
+        if (v < 0) {
+            v = -v;
+            print('-');
+        }
     }
 
 public:
-    template <typename V>
+    template <
+        typename V,
+        typename = std::enable_if_t<
+            !is_pointer_or_integral<decltype(pad<V>()._v)>
+        >
+    >
     static auto print (const pad<V>& obj) noexcept {
         auto l = _value_print_length(obj._v);
         if (obj._j == justify::right) {
             print(obj._v);
             _print_padding(l, obj._w, ' ');
         } else {
-            if constexpr (std::is_signed_v<V>) {
-                auto v = std::make_unsigned_t<decltype(obj._v)> {obj._v._v};
-                if (obj._v < 0) {
-                    v = -obj._v;
-                    print('-');
-                }
+            auto v = obj._v;
+            if constexpr (std::is_signed_v<decltype(v)>) {
+                _value_print_sign_and_reverse(v);
             }
             _print_padding(l, obj._w, obj._p);
             print(v);
