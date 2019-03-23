@@ -30,8 +30,8 @@
  * 
  */
 
-#ifndef KCPPT_IO_OUT_STR_AND_INT_HPP
-#define KCPPT_IO_OUT_STR_AND_INT_HPP
+#ifndef KCPPT_IOFMT_OUT_STR_AND_INT_HPP
+#define KCPPT_IOFMT_OUT_STR_AND_INT_HPP
 
 #include "../range.hpp"
 #include "../util.hpp"
@@ -42,7 +42,7 @@
 
 namespace kcppt {
 
-namespace io {
+namespace iofmt {
 
 namespace out {
 
@@ -406,4 +406,4 @@ std::size_t str_and_int<C>::_idx = str_and_int::idx::lf;
 
 }
 
-#endif /// KCPPT_IO_OUT_STR_AND_INT_HPP
+#endif /// KCPPT_IOFMT_OUT_STR_AND_INT_HPP

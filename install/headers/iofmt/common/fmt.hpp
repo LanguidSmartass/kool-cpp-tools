@@ -30,8 +30,8 @@
  *
  */
 
-#ifndef KCPPT_IO_COMMON_FMT_HPP
-#define KCPPT_IO_COMMON_FMT_HPP
+#ifndef KCPPT_IOFMT_COMMON_FMT_HPP
+#define KCPPT_IOFMT_COMMON_FMT_HPP
 
 #include "../../pow2.hpp"
 #include "../../traits.hpp"
@@ -41,7 +41,7 @@
 
 namespace kcppt {
 
-namespace io {
+namespace iofmt {
 
 namespace common {
 
@@ -202,4 +202,4 @@ namespace floats {
 
 }
 
-#endif /// KCPPT_IO_COMMON_FMT_HPP
+#endif /// KCPPT_IOFMT_COMMON_FMT_HPP
