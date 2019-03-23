@@ -1,7 +1,7 @@
 # kool-cpp-tools
 A set of useful templates, constexpr functions and other tricks that I use all the time in embedded development. C++17 and upwards, header-only, structured as a CMake package.
 
-Aside from some headers that contain implementation, the main is usable things are:
+Aside from some headers that contain implementation the usable things are:
 
 ## Allocators
 Runtime memory allocation
@@ -12,7 +12,7 @@ Runtime memory allocation
    Has substantial overhead per one unique block of memory (5 to 17 bytes, depending on your system bitness), therefore larger blocks are more preferable.
   
 ## IO
-Overhead-malleable user/string input/output
+Overhead-malleable formatting input/output
 * _str_and_int_
 
     Type-safe ASCII-only capable class that formats the input data (chars, c-strings, ints in udec, sdec, oct, hex and HEX) and sends it
@@ -28,10 +28,10 @@ Unsorted but useful
 * _byte_
 
     An implementation of an arithmetic type 'byte'. It is not just a
-    enum class as the C++17 std::byte. A byte occupies 8 bits and 
+    enum class as the C++17 std::byte. A byte occupies 8 bits and
     aligned as 1 byte in memory. It is not a char, nor a signed or
     unsigned char. Can be used in operations with native integral types
-    (signed/unsigned short/int/long/long long. Has a single member that
+    (signed/unsigned short/int/long/long long). Has a single member that
     is a plain unscoped enum member with an underlying type of either
     'int8_t or uint8_t'
     
