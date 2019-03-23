@@ -117,7 +117,6 @@ using pointer = accessor<W, decltype(Pointer), Pointer>;
 
 template <typename W, class IO>
 class reg_single {
-    static_assert(traits::is_integral_v<W>);
     static_assert(traits::is_class_v<IO>);
     
 private:
@@ -208,7 +207,6 @@ public:
 template <typename W, class IO, std::size_t BankSize = 1u>
 class reg_bank {
     
-    static_assert(traits::is_integral_v<W>);
     static_assert(traits::is_class_v<IO>);
     static_assert(BankSize != 0u);
     
