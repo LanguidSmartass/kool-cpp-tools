@@ -37,7 +37,7 @@
  *        in any other context other than when it is used as a return object
  *        from:
  *        auto reg_bank::operator[](std::size_t i) -> reg_single { return {i}; }
- *        
+ *
  *        With this particular class you can even make your own accessors for
  *        architecture-specific (processor) registers using inline assembly.
  *        The constructor must be constexpr and eiter take no arguments or have
@@ -78,19 +78,16 @@ namespace ioreg {
 
 namespace _implementation {
 
-template <typename W, typename T, T t>
-static inline auto dereference () noexcept -> volatile W& {
-    return *reinterpret_cast<volatile W*>(t);
-}
-
-template <typename W, typename T>
-static inline auto dereference (T t) noexcept -> volatile W& {
-    return *reinterpret_cast<volatile W*>(t);
+template <typename W, typename AddressType, AddressType Address>
+static inline auto dereference (std::size_t i = 0u) noexcept -> volatile W& {
+    static_assert(traits::is_integral_or_pointer_v<AddressType>);
+    static_assert(Address % sizeof(W) == 0u, "Address unaligned to sizeof(W)");
+    
+    return reinterpret_cast<volatile W*>(Address)[i];
 }
 
 template <typename W, typename AddressType, AddressType Address>
 class [[nodiscard]] accessor {
-    static_assert(traits::is_integral_v<W>);
     static_assert(traits::is_integral_or_pointer_v<AddressType>);
     static_assert(Address % sizeof(W) == 0u, "Address unaligned to sizeof(W)");
 public:
@@ -99,15 +96,11 @@ public:
 public:
     [[nodiscard]]
     auto read (std::size_t i = 0u) const noexcept -> W {
-        return _implementation::dereference<W, AddressType>(
-            Address + sizeof(W) * i
-        );
+        return _implementation::dereference<W, AddressType, Address>(i);
     }
     
     auto write (W w, std::size_t i = 0u) const noexcept -> void {
-        _implementation::dereference<W, AddressType>(
-            Address + sizeof(W) * i
-        ) = w;
+        _implementation::dereference<W, AddressType, Address>(i) = w;
     }
 };
 
