@@ -1,9 +1,31 @@
-/** @file fat_and_fast.hpp
+/** @file beefy.hpp
  * 
  * @author Novoselov Ivan
  * @email  jedi.orden@gmail.com
  * @date   14.03.2019
- * 
+ *
+ * MIT License
+ *
+ * Copyright (c) 2019 Ivan Novoselov
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
  * @brief Static allocator, all memory pools are allocated at compile time.
  *        Classes are divided into pure virtual 'storage_base' --
  *        pool holder interface
@@ -48,8 +70,9 @@
  *        twice as big as the overhead, but this is purely a personal opinion.
  *
  *        Summing up:
- *        it's fat because of the 5..17 bytes of overhead per single data block
- *        it's fast because this overhead allows the allocator to traverse
+ *        It's beefy because of the 5..17 bytes of overhead per single data
+ *        block.
+ *        It's fast because this overhead allows the allocator to traverse
  *        the control heaps with logN time
  *
  * Usage example:
@@ -84,13 +107,10 @@
  *
  */
 
-#ifndef KCPPT_ALLOCATORS_FAT_AND_FAST_HPP
-#define KCPPT_ALLOCATORS_FAT_AND_FAST_HPP
+#ifndef KCPPT_ALLOCATORS_BEEFY_HPP
+#define KCPPT_ALLOCATORS_BEEFY_HPP
 
-#include "../sequence.hpp"
 #include "../range.hpp"
-#include "../c_array.hpp"
-#include "../debug.hpp"
 
 #include <array>
 #include <cinttypes>
@@ -100,7 +120,7 @@ namespace kcppt {
 
 namespace allocators {
 
-namespace fat_and_fast {
+namespace beefy {
 
 namespace _implementation {
 
@@ -601,4 +621,4 @@ private:
     
 }
 
-#endif /// KCPPT_ALLOCATORS_FAT_AND_FAST_HPP
+#endif /// KCPPT_ALLOCATORS_BEEFY_HPP

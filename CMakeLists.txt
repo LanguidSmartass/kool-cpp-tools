@@ -3,7 +3,29 @@
 # @author Novoselov Ivan
 # @email  jedi.orden@gmail.com
 # @date   15.03.2019
-# 
+#
+# MIT License
+#
+# Copyright (c) 2019 Ivan Novoselov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 # @brief CMake package main file for kool-cpp-tool library
 # kcppt is an abbreviation, obviously
 
@@ -12,7 +34,7 @@ cmake_minimum_required(VERSION 3.13)
 set(CMAKE_CXX_STANDARD 17)
 
 set(library-name kcppt)
-set(project-name lib-${library-name})
+set(project-name ${library-name})
 set(package-config-file ${library-name}-config)
 
 project(
@@ -23,10 +45,6 @@ project(
 
 message("Library name: ${library-name}")
 
-if ("${install-path}" STREQUAL "")
-    message(FATAL_ERROR "Provide 'install-path' variable!")
-endif()
-
 #####################################
 # otherwise lots of 'template with C linkage' errors will occur
 # see this thread: 
@@ -34,7 +52,15 @@ endif()
 set(CMAKE_NO_SYSTEM_FROM_IMPORTED ON)
 #####################################
 
+if (testing)
+    set(install-path "A:/garbage")
+endif()
+
 add_subdirectory(install)
+
+if (testing)
+    include(tests/tests.cmake)
+endif()
 
 unset(package-config-file)
 unset(project-name)

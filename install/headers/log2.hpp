@@ -1,8 +1,8 @@
-/** @file endian.hpp
+/** @file log2.hpp
  * 
  * @author Novoselov Ivan
  * @email  jedi.orden@gmail.com
- * @date   03.03.2019
+ * @date   15.03.2019
  *
  * MIT License
  *
@@ -30,35 +30,38 @@
  * 
  */
 
-#ifndef KCPPT_ENDIAN_HPP
-#define KCPPT_ENDIAN_HPP
+#ifndef KCPPT_LOG2_HPP
+#define KCPPT_LOG2_HPP
 
-#include <cinttypes>
+#include "pow2.hpp"
+
+#include <limits>
 
 namespace kcppt {
 
-namespace endian {
+namespace log2 {
 
-union endian {
-private:
-    std::uint16_t _word;
-    std::uint8_t _bytes[sizeof(_word)];
-public:
-    constexpr endian () noexcept : _word(0x0201u) {}
+template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+[[nodiscard]]
+constexpr auto greater_equal (T&& t) noexcept -> std::intmax_t {
+    if (t == 0u)
+        return std::numeric_limits<std::intmax_t>::min();
     
-    [[nodiscard]]
-    constexpr auto little () const noexcept -> bool {
-        return _bytes[0u] == 0x01u;
-    }
-    
-    [[nodiscard]]
-    constexpr auto big () const noexcept -> bool {
-        return _bytes[0u] == 0x02u;
-    }
-};
+    auto is_pow2 = pow2::is_pow2(std::forward<T>(t));
+    return bitwise::rshift_count<T, 0, -1>(std::forward<T>(t)) + !is_pow2;
+}
 
+template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+[[nodiscard]]
+constexpr auto less_equal (T&& t) noexcept -> std::intmax_t {
+    if (t == 0u)
+        return std::numeric_limits<std::intmax_t>::min();
+    
+    return bitwise::rshift_count<T, 0, -1>(std::forward<T>(t));
 }
 
 }
 
-#endif /// KCPPT_ENDIAN_HPP
+}
+
+#endif /// KCPPT_LOG2_HPP

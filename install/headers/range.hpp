@@ -3,7 +3,29 @@
  * @author Novoselov Ivan
  * @email  jedi.orden@gmail.com
  * @date   05.03.2019
- * 
+ *
+ * MIT License
+ *
+ * Copyright (c) 2019 Ivan Novoselov
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
  * @brief  
  * 
  */
@@ -38,7 +60,20 @@ public:
     
     [[nodiscard]]
     constexpr auto operator!= (const iterator& other) noexcept -> bool {
-        return _i != other._i;
+        /// '<' instead of '!=' is intentional,
+        /// otherwise in cases when _step is > 1 range-for loop can
+        /// go past the last index of some container
+        return _i < other._i;
+    }
+    
+    [[nodiscard]]
+    constexpr auto operator<= (const iterator& other) noexcept -> bool {
+        return _i <= other._i;
+    }
+    
+    [[nodiscard]]
+    constexpr auto operator- (const iterator& other) noexcept -> T {
+        return _i - other._i;
     }
     
     [[nodiscard]]
@@ -83,7 +118,7 @@ public:
     constexpr range (T ibegin, T1 iend, T2 istep = 1) noexcept :
     _ibegin(ibegin), _iend(iend), _istep(istep)
     {}
-
+    
 public:
     [[nodiscard]]
     constexpr auto begin () const noexcept -> iterator {
@@ -95,6 +130,10 @@ public:
         return iterator(_iend, _istep);
     }
     
+    [[nodiscard]]
+    constexpr auto step () const noexcept -> T {
+        return _istep;
+    }
 };
 
 /**

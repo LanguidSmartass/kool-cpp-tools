@@ -1,8 +1,8 @@
-/** @file endian.hpp
+/** @file bitwise.hpp
  * 
  * @author Novoselov Ivan
  * @email  jedi.orden@gmail.com
- * @date   03.03.2019
+ * @date   15.03.2019
  *
  * MIT License
  *
@@ -30,35 +30,31 @@
  * 
  */
 
-#ifndef KCPPT_ENDIAN_HPP
-#define KCPPT_ENDIAN_HPP
+#ifndef KCPPT_BITWISE_HPP
+#define KCPPT_BITWISE_HPP
 
 #include <cinttypes>
+#include <type_traits>
 
 namespace kcppt {
 
-namespace endian {
+namespace bitwise {
 
-union endian {
-private:
-    std::uint16_t _word;
-    std::uint8_t _bytes[sizeof(_word)];
-public:
-    constexpr endian () noexcept : _word(0x0201u) {}
+template <typename T, T UntilT = 0, std::intmax_t CntStart = 0>
+constexpr auto rshift_count = [](T&& t) {
+    static_assert(std::is_integral_v<T>);
     
-    [[nodiscard]]
-    constexpr auto little () const noexcept -> bool {
-        return _bytes[0u] == 0x01u;
+    auto cnt = CntStart;
+    while (t > UntilT) {
+        t >>= 1u;
+        ++cnt;
     }
-    
-    [[nodiscard]]
-    constexpr auto big () const noexcept -> bool {
-        return _bytes[0u] == 0x02u;
-    }
+    return cnt;
 };
 
-}
 
 }
 
-#endif /// KCPPT_ENDIAN_HPP
+}
+
+#endif /// KCPPT_BITWISE_HPP
