@@ -1,5 +1,11 @@
 # kool-cpp-tools
-A set of useful templates, constexpr functions and other tricks that I use all the time in embedded development. C++17 and upwards, header-only, structured as a CMake package.
+An attempt to enforce type safety in embedded development. The idea for
+this library grew with me encountering design problems, and I share the
+ways I solved them.
+
+It is header-only and needs C++17 compiler and upwards, STL is required
+(for things like type_traits, utility, cinttypes, etc.). Installable as
+a CMake package.
 
 Here is a (hopefully) short list of what you can use:
 
