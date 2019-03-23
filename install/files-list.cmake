@@ -38,6 +38,7 @@ set(
     PREFIX_DIR/c_array.hpp
     PREFIX_DIR/debug.hpp
     PREFIX_DIR/endian.hpp
+    PREFIX_DIR/ioreg.hpp
     PREFIX_DIR/log2.hpp
     PREFIX_DIR/pow2.hpp
     PREFIX_DIR/range.hpp
