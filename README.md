@@ -11,8 +11,8 @@ Runtime memory allocation
    Storages sizes and their variability are selected by the user at compile time.
    Has substantial overhead per one unique block of memory (5 to 17 bytes, depending on your system bitness), therefore larger blocks are more preferable.
   
-## IO
-Overhead-malleable formatting input/output
+## IOFMT
+Overhead-malleable formatted input/output
 * _str_and_int_
 
     Type-safe ASCII-only capable class that formats the input data (chars, c-strings, ints in udec, sdec, oct, hex and HEX) and sends it
