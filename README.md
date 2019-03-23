@@ -55,6 +55,13 @@ Unsorted but useful
     A union class that can be used to determine the endianness of your
     system at compile time.
 
+* _ioreg_
+
+    Abstraction over 'hardware input-output register'. Use when
+    interfacing with timers, DMAs, UARTs and other hardware controllers
+    as well as architecture-specific CPU registers that are accessible
+    only through inline assembly.
+
 * _log2_
 
     Logarithm of base 2 arithmetic on integral types
