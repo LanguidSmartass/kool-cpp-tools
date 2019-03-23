@@ -1,7 +1,7 @@
 # kool-cpp-tools
 A set of useful templates, constexpr functions and other tricks that I use all the time in embedded development. C++17 and upwards, header-only, structured as a CMake package.
 
-Aside from some headers that contain implementation the usable things are:
+Here is a (hopefully) short list of what you can use:
 
 ## Allocators
 Runtime memory allocation
@@ -20,7 +20,7 @@ Overhead-malleable formatted input/output
     Uses custom light printf implementation which is also provided in this library.
     
 ## Miscellaneous
-Unsorted but useful
+Non-grouped but useful
 * _bitwise_
 
     Common bit operations on integral types, such as masking, l/r shifting with count, etc (the list will grow).
@@ -54,6 +54,13 @@ Unsorted but useful
 
     A union class that can be used to determine the endianness of your
     system at compile time.
+
+* _ioreg_
+
+    Abstraction over 'hardware input-output register'. Use when
+    interfacing with timers, DMAs, UARTs and other hardware controllers
+    as well as architecture-specific CPU registers that are accessible
+    only through inline assembly.
 
 * _log2_
 
