@@ -30,8 +30,8 @@
  * 
  */
 
-#ifndef KCPPT_IO_COMMON_BUILTIN_HPP
-#define KCPPT_IO_COMMON_BUILTIN_HPP
+#ifndef KCPPT_IOFMT_COMMON_BUILTIN_HPP
+#define KCPPT_IOFMT_COMMON_BUILTIN_HPP
 
 #include <cinttypes>
 #include <type_traits>
@@ -40,7 +40,7 @@
 
 namespace kcppt {
 
-namespace io {
+namespace iofmt {
 
 namespace common {
 
@@ -285,4 +285,4 @@ namespace inp {
     
 }
     
-#endif /// KCPPT_IO_COMMON_BUILTIN_HPP
+#endif /// KCPPT_IOFMT_COMMON_BUILTIN_HPP

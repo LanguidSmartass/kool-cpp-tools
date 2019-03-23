@@ -30,14 +30,14 @@
  * 
  */
 
-#ifndef KCPPT_IO_COMMON_CONVERSION_HPP
-#define KCPPT_IO_COMMON_CONVERSION_HPP
+#ifndef KCPPT_IOFMT_COMMON_CONVERSION_HPP
+#define KCPPT_IOFMT_COMMON_CONVERSION_HPP
 
 #include "builtin.hpp"
 
 namespace kcppt {
 
-namespace io {
+namespace iofmt {
 
 namespace common {
 
@@ -334,4 +334,4 @@ namespace inp {
 
 }
 
-#endif /// KCPPT_IO_COMMON_CONVERSION_HPP
+#endif /// KCPPT_IOFMT_COMMON_CONVERSION_HPP

@@ -30,8 +30,8 @@
  * 
  */
 
-#ifndef KCPPT_IO_PRINTF_STR_AND_INT_HPP
-#define KCPPT_IO_PRINTF_STR_AND_INT_HPP
+#ifndef KCPPT_IOFMT_PRINTF_STR_AND_INT_HPP
+#define KCPPT_IOFMT_PRINTF_STR_AND_INT_HPP
 
 #include "../common/conversion_table.hpp"
 #include "../common/conversion.hpp"
@@ -41,7 +41,7 @@
 
 namespace kcppt {
 
-namespace io {
+namespace iofmt {
 
 namespace printf {
 
@@ -312,4 +312,4 @@ private:
 
 }
 
-#endif /// KCPPT_IO_PRINTF_STR_AND_INT_HPP
+#endif /// KCPPT_IOFMT_PRINTF_STR_AND_INT_HPP

@@ -37,14 +37,14 @@
  *         array accesses by the min/max indices.
  */
 
-#ifndef KCPPT_IO_COMMON_CONVERSION_TABLE_HPP
-#define KCPPT_IO_COMMON_CONVERSION_TABLE_HPP
+#ifndef KCPPT_IOFMT_COMMON_CONVERSION_TABLE_HPP
+#define KCPPT_IOFMT_COMMON_CONVERSION_TABLE_HPP
 
 #include <array>
 
 namespace kcppt {
 
-namespace io {
+namespace iofmt {
 
 namespace common {
 
@@ -135,4 +135,4 @@ struct idx {
 
 }
 
-#endif /// KCPPT_IO_COMMON_CONVERSION_TABLE_HPP
+#endif /// KCPPT_IOFMT_COMMON_CONVERSION_TABLE_HPP
