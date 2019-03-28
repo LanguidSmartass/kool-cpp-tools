@@ -78,24 +78,24 @@
  * Usage example:
  *
  * /// declare multiple storages types
- * using storage_char_0 = storage<char,    2, 1024>;
- * using storage_char_0 = storage<char,   11,  500>;
- * using storage_char_0 = storage<char,   50,   22>;
- * using storage_char_0 = storage<char, 4023,    3>;
+ * using storage_0 = storage<   2, 1024>;
+ * using storage_1 = storage<  11,  500>;
+ * using storage_2 = storage<  50,   22>;
+ * using storage_3 = storage<4023,    3>;
  *
  * /// instantiate the storages
- * static auto s0 = storage_char_0();
- * static auto s1 = storage_char_0();
- * static auto s2 = storage_char_0();
- * static auto s3 = storage_char_0();
+ * static auto s0 = storage_0();
+ * static auto s1 = storage_1();
+ * static auto s2 = storage_2();
+ * static auto s3 = storage_3();
  *
  * /// make std::array of pointers to these storages (virtual base ones)
- * static auto storage = make_ptrs_to_storages_array<char>(s0, s1, s2, s3);
+ * static auto storage = make_ptrs_to_storages_array(s0, s1, s2, s3);
  *
  * /// Bind the storage to the allocator
- * using alloc = allocator<char, decltype(storage), storage>;
+ * using alloc = allocator<decltype(storage), storage>;
  *
- * /// From here everything is simole -- use your memory to your heart's content
+ * /// From here everything is simple -- use your memory to your heart's content
  * auto myalloc = alloc();
  * auto p0 = myalloc.allocate(0);
  * auto p1 = myalloc.allocate(1);
@@ -111,6 +111,7 @@
 #define KCPPT_ALLOCATORS_BEEFY_HPP
 
 #include "../range.hpp"
+#include "../c_array.hpp"
 
 #include <array>
 #include <cinttypes>
@@ -145,20 +146,18 @@ constexpr static auto build_indices_array () noexcept {
     }
     return ret;
 }
-    
-    
+
 }
 
-template <typename T>
 class storage_base {
 public:
     /**
-     * @return size of a single block of Ts
+     * @return size of a single block of bytes
      */
     [[nodiscard]]
     virtual auto block_size () const noexcept -> std::size_t = 0;
     /**
-     * @return total number of blocks of Ts (each block has 'block_size')
+     * @return total number of blocks of bytes (each block has 'block_size')
      */
     [[nodiscard]]
     virtual auto blocks_count () const noexcept -> std::size_t = 0;
@@ -180,23 +179,23 @@ public:
     [[nodiscard]]
     virtual auto heap_indices_reversed () noexcept -> std::size_t* = 0;
     /**
-     * @return pointer to an array of pointers to each block of T in the
+     * @return pointer to an array of pointers to each byte block in the
      *         internal pool
      */
     [[nodiscard]]
-    virtual auto sorted_pointers () const noexcept -> T* const* = 0;
+    virtual auto sorted_pointers () const noexcept -> void* const* = 0;
     
     virtual ~storage_base () noexcept = default;
 };
 
-template <typename T, std::size_t TBlockSize, std::size_t TBlocksCount>
-class storage final : public storage_base<T> {
-    static_assert(!std::is_void_v<T>);
+template <std::size_t TBlockSize, std::size_t TBlocksCount>
+class storage final : public storage_base {
     static_assert(TBlockSize != 0);
     static_assert(TBlocksCount != 0);
 
 private:
-    T _pool_of_T[TBlockSize * TBlocksCount];
+    c_array::c_array<std::uint8_t, TBlockSize * TBlocksCount> _pool_of_bytes;
+//    std::uint8_t _pool_of_T[TBlockSize * TBlocksCount];
     
     /******
      * @brief _heap_flags, _heap_pointers and _heap_indices are a part of a
@@ -223,13 +222,13 @@ private:
      */
     std::array<std::size_t, TBlocksCount> _heap_indices_reversed;
     /**
-     * @brief sorted array of const pointers to each block in _pool_of_T
+     * @brief sorted array of const pointers to each block in _pool_of_bytes
      */
-    const std::array<T*, TBlocksCount> _sorted_pointers;
+    const std::array<void*, TBlocksCount> _sorted_pointers;
 
 public:
     storage () noexcept :
-        _pool_of_T(),
+        _pool_of_bytes(),
         _heap_flags(),
         _heap_indices(
             _implementation::build_indices_array<TBlocksCount>()
@@ -238,94 +237,81 @@ public:
             _implementation::build_indices_array<TBlocksCount>()
         ),
         _sorted_pointers(
-            _implementation::build_pointers_array<T, TBlocksCount>
-                (_pool_of_T, TBlockSize)
+            _implementation::build_pointers_array<void, TBlocksCount>
+                (_pool_of_bytes, TBlockSize)
         ) {}
     
-    ~storage () = default;
+    ~storage () noexcept final = default;
 
 public:
     [[nodiscard]]
-    virtual auto block_size () const noexcept -> std::size_t final {
+    auto block_size () const noexcept -> std::size_t final {
         return TBlockSize;
     }
     
     [[nodiscard]]
-    virtual auto blocks_count () const noexcept -> std::size_t final {
+    auto blocks_count () const noexcept -> std::size_t final {
         return TBlocksCount;
     }
     
     [[nodiscard]]
-    virtual auto heap_flags () noexcept -> bool* final {
+    auto heap_flags () noexcept -> bool* final {
         return _heap_flags.data();
     }
     
     [[nodiscard]]
-    virtual auto heap_indices () noexcept -> std::size_t* final {
+    auto heap_indices () noexcept -> std::size_t* final {
         return _heap_indices.data();
     }
     
     [[nodiscard]]
-    virtual auto heap_indices_reversed () noexcept -> std::size_t* final {
+    auto heap_indices_reversed () noexcept -> std::size_t* final {
         return _heap_indices_reversed.data();
     }
     
     [[nodiscard]]
-    virtual auto sorted_pointers () const noexcept -> T* const* final {
+    auto sorted_pointers () const noexcept -> void* const* final {
         return _sorted_pointers.data();
     }
 };
 
 template <
     template <typename, std::size_t...> class FixedSequenceContainer,
-    typename T,
     std::size_t...Sizes
 >
 struct ptrs_to_storages_container {
-    using type = FixedSequenceContainer<storage_base<T>*, Sizes...>;
+    using type = FixedSequenceContainer<storage_base*, Sizes...>;
 };
 
 template <
     template <typename, std::size_t...> class FixedSequenceContainer,
-    typename T,
     std::size_t...Sizes
 >
 using ptr_to_storages_container_t =
-typename ptrs_to_storages_container<FixedSequenceContainer, T, Sizes...>::type;
+typename ptrs_to_storages_container<FixedSequenceContainer, Sizes...>::type;
 
-template <
-    typename T,
-    std::size_t...Sizes
->
+template <std::size_t...Sizes>
 using ptrs_to_storages_array_t =
-typename ptrs_to_storages_container<std::array, T, Sizes...>::type;
+typename ptrs_to_storages_container<std::array, Sizes...>::type;
 
 template <
     template <typename, std::size_t...> class FixedSequenceContainer,
-    typename T,
     typename...Ss
 >
 constexpr auto make_ptrs_to_storages_container (Ss&&...ss) noexcept {
     ptr_to_storages_container_t<
-        FixedSequenceContainer, T, sizeof...(ss)
+        FixedSequenceContainer, sizeof...(ss)
     > ret {&ss...};
     return ret;
 }
 
-template <
-    typename T,
-    typename...Ss
->
+template <typename...Ss>
 constexpr auto make_ptrs_to_storages_array (Ss&& ...ss) noexcept {
-    ptrs_to_storages_array_t<
-        T, sizeof...(ss)
-    > ret {&ss...};
-    return ret;
+    return ptrs_to_storages_array_t<sizeof...(ss)> {&ss...};
 }
 
 /**
  * @brief
- * @tparam T
  * @tparam SequenceContainer -- any SequenceContainer class.
  * @tparam Container -- reference to SequenceContainer,
  *         the pointers inside must satisfy two requirements:
@@ -333,17 +319,12 @@ constexpr auto make_ptrs_to_storages_array (Ss&& ...ss) noexcept {
  *         -- every block_size must be unique (blocks_count can be the same)
  *         i.e. sort them by Container[i]->block_size()
  */
-template <
-    typename T,
-    typename SequenceContainer,
-    SequenceContainer& Container
->
+template <typename SequenceContainer, SequenceContainer& Container>
 class allocator {
-    static_assert(!std::is_void_v<T>);
     static_assert(
         std::is_same_v<
             typename SequenceContainer::value_type,
-            storage_base<T>*
+            storage_base*
         >
     );
     /**
@@ -354,7 +335,7 @@ class allocator {
     bool* _heap_flags;
     std::size_t* _heap_indices;
     std::size_t* _heap_indices_reversed;
-    T* const* _sorted_pointers;
+    void* const* _sorted_pointers;
 
 public:
     constexpr allocator () noexcept :
@@ -368,7 +349,7 @@ public:
 
 public:
     [[nodiscard]]
-    auto allocate (std::size_t nT) noexcept -> T* {
+    auto allocate (std::size_t nT) noexcept -> void* {
         auto i = _search_fitting_container(nT); ///< O(logn)
         if (_container_index_out_of_bounds(i)) { ///< O(1)
             return nullptr;
@@ -385,7 +366,7 @@ public:
         return p;
     }
     
-    auto deallocate (T* p, std::size_t nT) noexcept -> void {
+    auto deallocate (void* p, std::size_t nT) noexcept -> void {
         auto i = _search_fitting_container(nT); ///< O(logn)
         if (_container_index_out_of_bounds(i)) { ///< O(1)
             return;
@@ -484,7 +465,7 @@ private:
     }
     
     [[nodiscard]]
-    auto _heap_top_pointer () noexcept -> T* {
+    auto _heap_top_pointer () noexcept -> void* {
         return _sorted_pointers[_heap_indices[0u]];
     }
     
@@ -585,7 +566,7 @@ private:
      * @return
      */
     [[nodiscard]]
-    auto _search_pointer_original_index (const T* p)
+    auto _search_pointer_original_index (const void* p)
     noexcept -> std::size_t {
         auto il = 0llu;        /// start left border at the start
         auto ir = _blocks_count; /// start right border past the end
@@ -614,7 +595,7 @@ private:
     }
     
 };
-    
+
 }
     
 }
