@@ -68,8 +68,7 @@
 #ifndef KCPPT_IOREG_HPP
 #define KCPPT_IOREG_HPP
 
-#include "traits.hpp"
-
+#include "cast.hpp"
 #include <cinttypes>
 
 namespace kcppt {
@@ -77,41 +76,75 @@ namespace kcppt {
 namespace ioreg {
 
 namespace _implementation {
+//
+//template <
+//    auto Address,
+//    util::enable_if_integral_t<decltype(Address)>* = nullptr
+//>
+//constexpr static auto is_aligned () noexcept {
+//    return (Address % sizeof(uintptr_t)) == 0u;
+//}
+//
+//template <
+//    auto Address,
+//    util::enable_if_pointer_t<decltype(Address)>* = nullptr
+//>
+//constexpr static auto is_aligned () noexcept {
+//    return true;
+//}
 
-template <typename W, typename AddressType, AddressType Address>
+template <typename A>
+constexpr static auto is_aligned (
+    A Address, util::enable_if_integral_t<A>* = nullptr
+) noexcept {
+    return (Address % sizeof(uintptr_t)) == 0u;
+}
+
+template <typename A>
+constexpr static auto is_aligned (
+    A Address, util::enable_if_pointer_t<A>* = nullptr
+) noexcept {
+    (void)Address;
+    return true;
+}
+
+template <typename W, auto Address>
 static inline auto dereference (std::size_t i = 0u) noexcept -> volatile W& {
-    static_assert(traits::is_integral_or_pointer_v<AddressType>);
-    static_assert(Address % sizeof(W) == 0u, "Address unaligned to sizeof(W)");
+    static_assert(traits::is_integral_or_pointer_v<decltype(Address)>);
+    static_assert(
+        is_aligned(Address),
+        "Raw address is unaligned to sizeof(std::uintptr_t)"
+    );
     
     return reinterpret_cast<volatile W*>(Address)[i];
 }
 
-template <typename W, typename AddressType, AddressType Address>
+template <typename W, auto Address>
 class [[nodiscard]] accessor {
-    static_assert(traits::is_integral_or_pointer_v<AddressType>);
-    static_assert(Address % sizeof(W) == 0u, "Address unaligned to sizeof(W)");
+    static_assert(traits::is_integral_or_pointer_v<decltype(Address)>);
+//    static_assert(Address % sizeof(W) == 0u, "Address unaligned to sizeof(W)");
 public:
     constexpr accessor () noexcept = default;
 
 public:
     [[nodiscard]]
     auto read (std::size_t i = 0u) const noexcept -> W {
-        return _implementation::dereference<W, AddressType, Address>(i);
+        return _implementation::dereference<W, Address>(i);
     }
     
     auto write (W w, std::size_t i = 0u) const noexcept -> void {
-        _implementation::dereference<W, AddressType, Address>(i) = w;
+        _implementation::dereference<W, Address>(i) = w;
     }
 };
 
 template <typename W, std::uintptr_t Address>
-using unsigned_address = accessor<W, decltype(Address), Address>;
+using unsigned_address = accessor<W, Address>;
 
 template <typename W, std::intptr_t Address>
-using signed_address = accessor<W, decltype(Address), Address>;
+using signed_address = accessor<W, Address>;
 
 template <typename W, W* Pointer>
-using pointer = accessor<W, decltype(Pointer), Pointer>;
+using pointer = accessor<W, Pointer>;
 
 }
 
@@ -131,8 +164,14 @@ private:
         _access.write(w, _i);
     }
 
+private:
+    template<typename, class, std::size_t>
+    friend class reg_bank;
+    
+    constexpr explicit reg_single (std::size_t i) noexcept : _i(i) {}
+
 public:
-    constexpr explicit reg_single (std::size_t i = 0u) noexcept : _i(i) {}
+    constexpr reg_single () noexcept : _i(0u) {}
     
 public:
     /**
@@ -214,13 +253,12 @@ public:
     constexpr reg_bank () noexcept = default;
     
 public:
-    constexpr auto size () const noexcept -> std::size_t {
+    constexpr auto size () const noexcept {
         return BankSize;
     }
     
-    constexpr auto operator[] (std::size_t i) const noexcept
-    -> reg_single<W, IO> {
-        return { i };
+    constexpr auto operator[] (std::size_t i) const noexcept {
+        return reg_single<W, IO>{ i };
     }
 };
 
