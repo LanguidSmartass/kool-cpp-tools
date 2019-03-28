@@ -32,14 +32,13 @@
  *         Promotable to signed/unsigned ints, floats and doubles.
  *
  */
-
+ 
 #ifndef KCPPT_BYTE_HPP
 #define KCPPT_BYTE_HPP
 
-#include "util.hpp"
-
 #include <cinttypes>
 #include <type_traits>
+#include <utility>
 
 namespace kcppt {
 
@@ -68,18 +67,26 @@ private:
 public:
     template <
         typename IntegerType,
-        util::enable_if_integral_t<IntegerType>* = nullptr
+        std::enable_if_t<std::is_integral_v<IntegerType>>* = nullptr
     >
     // explicit(false) // wait for C++20
     constexpr byte (IntegerType i) noexcept :
         _enum_v(static_cast<_enum_type>(i)) {
-        static_assert(std::is_integral_v<IntegerType>);
     }
     
+    template <
+        typename FloatingPointType,
+        std::enable_if_t<std::is_floating_point_v<FloatingPointType>>* = nullptr
+    >
+    // explicit(false) // wait for C++20
+    constexpr byte (FloatingPointType f) noexcept :
+        _enum_v(static_cast<_enum_type>(f)) {
+    }
+
 public:
     template <
         typename IntegerType,
-        util::enable_if_integral_t<IntegerType>* = nullptr
+        std::enable_if_t<std::is_integral_v<IntegerType>>* = nullptr
     >
     [[nodiscard]]
     // explicit(false) // wait for C++20
@@ -88,13 +95,13 @@ public:
     }
     
     template <
-        typename FloatType,
-        util::enable_if_floating_point_t<FloatType>* = nullptr
+        typename FloatingPointType,
+        std::enable_if_t<std::is_floating_point_v<FloatingPointType>>* = nullptr
     >
     [[nodiscard]]
     // explicit(false) // wait for C++20
-    constexpr operator FloatType () {
-        return static_cast<FloatType>(_to_int(_enum_v));
+    constexpr operator FloatingPointType () {
+        return static_cast<FloatingPointType>(_to_int(_enum_v));
     }
 
 public:
