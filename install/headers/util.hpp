@@ -113,6 +113,10 @@ using enable_if_integral_t =
 std::enable_if_t<traits::is_integral_v<V>, V>;
 
 template <typename V>
+using enable_if_pointer_t =
+    std::enable_if_t<traits::is_pointer_v<V>, V>;
+
+template <typename V>
 using enable_if_integral_or_pointer_t =
 std::enable_if_t<traits::is_integral_or_pointer_v<V>, V>;
 
