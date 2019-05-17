@@ -35,6 +35,7 @@
 
 #include "traits.hpp"
 #include "range.hpp"
+#include "util.hpp"
 
 #include <cinttypes>
 #include <climits>
@@ -116,10 +117,21 @@ constexpr auto mask (std::size_t nb = 0u) noexcept -> T {
     return m;
 }
 
-template <typename T, T UntilT = 0, std::intmax_t CntStart = 0>
-constexpr auto rshift_count = [](T&& t) {
-    static_assert(std::is_integral_v<T>);
-    
+/**
+ * @brief Right shift a given value 't' and increment the counter until 'UntilT'
+ *        is reached
+ * @tparam T deduced integral type
+ * @tparam UntilT guard
+ * @tparam CntStart counter start
+ * @param t given value
+ * @return counted value
+ *
+ */
+template <
+    typename T, T UntilT = 0, std::intmax_t CntStart = 0,
+    typename = util::enable_if_integral_t<T>
+>
+constexpr auto rshift_count (T t) {
     auto cnt = CntStart;
     while (t > UntilT) {
         t >>= 1u;
