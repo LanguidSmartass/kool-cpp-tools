@@ -33,8 +33,8 @@
 #ifndef KCPPT_IOFMT_OUT_STR_AND_INT_HPP
 #define KCPPT_IOFMT_OUT_STR_AND_INT_HPP
 
-#include "../range.hpp"
-#include "../util.hpp"
+#include "../kcppt/range.hpp"
+#include "../kcppt/util.hpp"
 #include "common/fmt.hpp"
 #include "printf/str_and_int.hpp"
 

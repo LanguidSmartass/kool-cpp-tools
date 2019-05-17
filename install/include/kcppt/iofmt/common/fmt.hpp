@@ -33,8 +33,8 @@
 #ifndef KCPPT_IOFMT_COMMON_FMT_HPP
 #define KCPPT_IOFMT_COMMON_FMT_HPP
 
-#include "../../pow2.hpp"
-#include "../../traits.hpp"
+#include "../../kcppt/pow2.hpp"
+#include "../../kcppt/traits.hpp"
 #include <cinttypes>
 #include <type_traits>
 #include <climits>

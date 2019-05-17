@@ -39,11 +39,11 @@ namespace kcppt {
 namespace debug {
 
 /**
- * @brief intentionally incomplete class, TD stands for TypeDebugging
+ * @brief intentionally incomplete class
  * @tparam T any type
  */
 template <typename T>
-class TD;
+class type_debugger;
 
 /**
  * @brief Displays a compilation error message so you can look what your
@@ -52,8 +52,9 @@ class TD;
  * @param t instance of any type
  */
 template <typename T>
-constexpr auto type_display_on_compilation_error (const T&) noexcept -> void {
-    TD<T> t;
+constexpr auto display_type_inside_incomplete_type_error (const T&) noexcept {
+    type_debugger<T> t;
+    return false;
 }
 
 }

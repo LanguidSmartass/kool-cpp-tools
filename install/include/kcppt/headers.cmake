@@ -23,26 +23,29 @@
 set(
     headers-list-template
     
-    PREFIX_DIR/allocators/beefy.hpp
+    allocators/beefy.hpp
 
-    PREFIX_DIR/io/common/builtin.hpp
-    PREFIX_DIR/io/common/conversion.hpp
-    PREFIX_DIR/io/common/conversion_table.hpp
-    PREFIX_DIR/io/common/fmt.hpp
+    io/common/builtin.hpp
+    io/common/conversion.hpp
+    io/common/conversion_table.hpp
+    io/common/fmt.hpp
     
-    PREFIX_DIR/io/printf/str_and_int.hpp
-    PREFIX_DIR/io/out_str_and_int.hpp
+    io/printf/str_and_int.hpp
+    io/out_str_and_int.hpp
 
-    PREFIX_DIR/bitwise.hpp
-    PREFIX_DIR/byte.hpp
-    PREFIX_DIR/c_array.hpp
-    PREFIX_DIR/debug.hpp
-    PREFIX_DIR/endian.hpp
-    PREFIX_DIR/ioreg.hpp
-    PREFIX_DIR/log2.hpp
-    PREFIX_DIR/pow2.hpp
-    PREFIX_DIR/range.hpp
-    PREFIX_DIR/sequence.hpp
-    PREFIX_DIR/traits.hpp
-    PREFIX_DIR/util.hpp
+    align.hpp
+    ascii.hpp
+    bitwise.hpp
+    byte.hpp
+    c_array.hpp
+    debug.hpp
+    endian.hpp
+    ioreg.hpp
+    log2.hpp
+    mathrel.hpp
+    pow2.hpp
+    range.hpp
+    sequence.hpp
+    traits.hpp
+    util.hpp
 )

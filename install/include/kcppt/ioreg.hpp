@@ -68,165 +68,155 @@
 #ifndef KCPPT_IOREG_HPP
 #define KCPPT_IOREG_HPP
 
-#include "cast.hpp"
+#include "align.hpp"
+
 #include <cinttypes>
+#include <type_traits>
 
 namespace kcppt {
 
 namespace ioreg {
 
 namespace _implementation {
-//
-//template <
-//    auto Address,
-//    util::enable_if_integral_t<decltype(Address)>* = nullptr
-//>
-//constexpr static auto is_aligned () noexcept {
-//    return (Address % sizeof(uintptr_t)) == 0u;
-//}
-//
-//template <
-//    auto Address,
-//    util::enable_if_pointer_t<decltype(Address)>* = nullptr
-//>
-//constexpr static auto is_aligned () noexcept {
-//    return true;
-//}
 
-template <typename A>
-constexpr static auto is_aligned (
-    A Address, util::enable_if_integral_t<A>* = nullptr
-) noexcept {
-    return (Address % sizeof(uintptr_t)) == 0u;
-}
+template <auto Address, typename T = void>
+using select_addressed_type_t = std::conditional_t<
+    traits::is_pointer_v<decltype(Address)>,
+    std::remove_pointer_t<decltype(Address)>,
+    std::conditional_t<
+        traits::is_integral_v<decltype(Address)> && traits::is_integral_v<T>,
+        T,
+        void
+    >
+>;
 
-template <typename A>
-constexpr static auto is_aligned (
-    A Address, util::enable_if_pointer_t<A>* = nullptr
-) noexcept {
-    (void)Address;
-    return true;
-}
-
-template <typename W, auto Address>
+template <auto Address, typename W>
+[[nodiscard]]
 static inline auto dereference (std::size_t i = 0u) noexcept -> volatile W& {
-    static_assert(traits::is_integral_or_pointer_v<decltype(Address)>);
-    static_assert(
-        is_aligned(Address),
-        "Raw address is unaligned to sizeof(std::uintptr_t)"
-    );
-    
+    static_assert(align::is_aligned<Address, W>());
     return reinterpret_cast<volatile W*>(Address)[i];
 }
 
-template <typename W, auto Address>
+template <
+    auto Address,
+    typename T = void
+>
 class [[nodiscard]] accessor {
-    static_assert(traits::is_integral_or_pointer_v<decltype(Address)>);
-//    static_assert(Address % sizeof(W) == 0u, "Address unaligned to sizeof(W)");
+private:
+    using _select_type = select_addressed_type_t<Address, T>;
+    static_assert(!std::is_void_v<_select_type>);
+
+public:
+    using type = _select_type;
+
 public:
     constexpr accessor () noexcept = default;
 
 public:
     [[nodiscard]]
-    auto read (std::size_t i = 0u) const noexcept -> W {
-        return _implementation::dereference<W, Address>(i);
+    auto read (std::size_t i = 0u) const noexcept -> type {
+        return _implementation::dereference<Address, type>(i);
     }
     
-    auto write (W w, std::size_t i = 0u) const noexcept -> void {
-        _implementation::dereference<W, Address>(i) = w;
+    auto write (type v, std::size_t i = 0u) const noexcept -> void {
+        _implementation::dereference<Address, type>(i) = v;
     }
 };
 
-template <typename W, std::uintptr_t Address>
-using unsigned_address = accessor<W, Address>;
+template <std::uintptr_t Address, typename W>
+using unsigned_address = accessor<Address, W>;
 
-template <typename W, std::intptr_t Address>
-using signed_address = accessor<W, Address>;
+template <std::intptr_t Address, typename W>
+using signed_address = accessor<Address, W>;
 
-template <typename W, W* Pointer>
-using pointer = accessor<W, Pointer>;
+template <auto Pointer>
+using pointer = accessor<Pointer>;
 
 }
 
-template <typename W, class IO>
+template <class IO>
 class reg_single {
+private:
     static_assert(traits::is_class_v<IO>);
-    
+    using _io_type = typename IO::type;
+//    constexpr static auto a = debug::display_type_inside_incomplete_type_error(_io_type());
+    static_assert(traits::is_integral_or_pointer_v<_io_type>);
 private:
     constexpr static auto _access = IO();
     const std::size_t _i;
     
-    auto _read () const noexcept -> W {
+    auto _read () const noexcept -> _io_type {
         return _access.read(_i);
     }
     
-    auto _write (W w) const noexcept -> void {
+    auto _write (_io_type w) const noexcept {
         _access.write(w, _i);
     }
 
 private:
-    template<typename, class, std::size_t>
+    template<class, std::size_t>
     friend class reg_bank;
     
-    constexpr explicit reg_single (std::size_t i) noexcept : _i(i) {}
-
 public:
-    constexpr reg_single () noexcept : _i(0u) {}
+    using type = _io_type;
     
+public:
+    constexpr explicit reg_single (std::size_t i = 0) noexcept : _i(i) {}
+
 public:
     /**
      * @brief Intentional implicit conversion to the underlying type W
      * @return register value in an integral conversion context
      */
     [[nodiscard]]
-    operator W () const noexcept { return _read(); }
+    operator type () const noexcept { return _read(); }
     
     [[nodiscard]]
-    auto operator& (W w) const noexcept -> W {
+    auto operator& (type w) const noexcept -> type {
         return _read() & w;
     }
     
     [[nodiscard]]
-    auto operator| (W w) const noexcept -> W {
+    auto operator| (type w) const noexcept -> type {
         return _read() | w;
     }
     
     [[nodiscard]]
-    auto operator^ (W w) const noexcept -> W {
+    auto operator^ (type w) const noexcept -> type {
         return _read() ^ w;
     }
     
     [[nodiscard]]
-    auto operator~ () const noexcept -> W {
+    auto operator~ () const noexcept -> type {
         return ~_read();
     }
     
     [[nodiscard]]
-    auto operator>> (std::size_t n) const noexcept -> W {
+    auto operator>> (std::size_t n) const noexcept -> type {
         return _read() >> n;
     }
     
     [[nodiscard]]
-    auto operator<< (std::size_t n) const noexcept -> W {
+    auto operator<< (std::size_t n) const noexcept -> type {
         return _read() << n;
     }
     
-    auto operator= (W w) const noexcept -> const reg_single& {
+    auto operator= (type w) const noexcept -> const reg_single& {
         _write(w);
         return *this;
     }
     
-    auto operator&= (W w) const noexcept -> const reg_single& {
+    auto operator&= (type w) const noexcept -> const reg_single& {
         _write(*this & w);
         return *this;
     }
     
-    auto operator|= (W w) const noexcept -> const reg_single& {
+    auto operator|= (type w) const noexcept -> const reg_single& {
         _write(*this | w);
         return *this;
     }
     
-    auto operator^= (W w) const noexcept -> const reg_single& {
+    auto operator^= (type w) const noexcept -> const reg_single& {
         _write(*this ^ w);
         return *this;
     }
@@ -243,11 +233,12 @@ public:
     
 };
 
-template <typename W, class IO, std::size_t BankSize = 1u>
+template <class IO, std::size_t BankSize>
 class reg_bank {
-    
-    static_assert(traits::is_class_v<IO>);
     static_assert(BankSize != 0u);
+    
+public:
+    using type = typename IO::type;
     
 public:
     constexpr reg_bank () noexcept = default;
@@ -258,61 +249,61 @@ public:
     }
     
     constexpr auto operator[] (std::size_t i) const noexcept {
-        return reg_single<W, IO>{ i };
+        return reg_single<IO>{ i };
     }
 };
 
-template <typename W, std::uintptr_t Address>
+template <std::uintptr_t Address, typename W>
 using reg_single_unsigned_address =
-    reg_single<W, _implementation::unsigned_address<W, Address>>;
+    reg_single<_implementation::unsigned_address<Address, W>>;
 
-template <typename W, std::intptr_t Address>
+template <std::intptr_t Address, typename W>
 using reg_single_signed_address =
-    reg_single<W, _implementation::signed_address<W, Address>>;
+    reg_single<_implementation::signed_address<Address, W>>;
 
-template <typename W, W* Pointer>
-using reg_single_pointer = reg_single<W, _implementation::pointer<W, Pointer>>;
+template <auto Pointer>
+using reg_single_pointer = reg_single<_implementation::pointer<Pointer>>;
 
 
-template <typename W, std::uintptr_t Address, std::size_t BankSize>
+template <std::uintptr_t Address, typename W, std::size_t BankSize>
 using reg_bank_unsigned_address =
-    reg_bank<W, _implementation::unsigned_address<W, Address>, BankSize>;
+    reg_bank<_implementation::unsigned_address<Address, W>, BankSize>;
 
-template <typename W, std::intptr_t Address, std::size_t BankSize>
+template <std::intptr_t Address, typename W, std::size_t BankSize>
 using reg_bank_signed_address =
-    reg_bank<W, _implementation::signed_address<W, Address>, BankSize>;
+    reg_bank<_implementation::signed_address<Address, W>, BankSize>;
 
-template <typename W, W* Pointer, std::size_t BankSize>
+template <auto Pointer, std::size_t BankSize, util::enable_if_pointer_t<decltype(Pointer)>* = nullptr>
 using reg_bank_pointer =
-    reg_bank<W, _implementation::pointer<W, Pointer>, BankSize>;
+    reg_bank<_implementation::pointer<Pointer>, BankSize>;
 
 
 /// Shorthand notations
 /// General
-template <typename W, class IO>
-using rs = reg_single<W, IO>;
+template <class IO>
+using rs = reg_single<IO>;
 
-template <typename W, class IO, std::size_t BankSize>
-using rb = reg_bank<W, IO, BankSize>;
+template <class IO, std::size_t BankSize>
+using rb = reg_bank<IO, BankSize>;
 
 /// Specific
-template <typename W, std::uintptr_t Address>
-using rs_uaddr = reg_single_unsigned_address<W, Address>;
+template <std::uintptr_t Address, typename W>
+using rs_uaddr = reg_single_unsigned_address<Address, W>;
 
-template <typename W, std::intptr_t Address>
-using rs_saddr = reg_single_signed_address<W, Address>;
+template <std::intptr_t Address, typename W>
+using rs_saddr = reg_single_signed_address<Address, W>;
 
-template <typename W, W* Pointer>
-using rs_ptr = reg_single_pointer<W, Pointer>;
+template <auto Pointer>
+using rs_ptr = reg_single_pointer<Pointer>;
 
 template <typename W, std::uintptr_t Address, std::size_t BankSize>
-using rb_uaddr = reg_bank_unsigned_address<W, Address, BankSize>;
+using rb_uaddr = reg_bank_unsigned_address<Address, W, BankSize>;
 
 template <typename W, std::intptr_t Address, std::size_t BankSize>
-using rb_saddr = reg_bank_signed_address<W, Address, BankSize>;
+using rb_saddr = reg_bank_signed_address<Address, W, BankSize>;
 
-template <typename W, W* Pointer, std::size_t BankSize>
-using rb_ptr = reg_bank_pointer<W, Pointer, BankSize>;
+template <auto Pointer, std::size_t BankSize>
+using rb_ptr = reg_bank_pointer<Pointer, BankSize>;
 
 }
 

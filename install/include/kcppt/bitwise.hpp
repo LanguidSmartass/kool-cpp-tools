@@ -48,27 +48,32 @@ template <typename T>
 constexpr std::size_t bit_sizeof_v = sizeof(T) * CHAR_BIT;
 
 template <typename T>
+[[nodiscard]]
 constexpr auto bit_sizeof (const T& t) noexcept -> std::size_t {
     return sizeof(t) * CHAR_BIT;
 };
 
 template <typename T>
+[[nodiscard]]
 constexpr auto set (T t) noexcept {
     return static_cast<T>((1u << bit_sizeof(t)) - 1u);
 }
 
 template <typename T>
+[[nodiscard]]
 constexpr auto clear (T t) noexcept -> T {
     (void)t;
     return 0;
 }
 
 template <typename T>
+[[nodiscard]]
 constexpr auto toggle (T t) noexcept -> T {
     return ~t;
 }
 
 template <typename T, typename B = std::size_t>
+[[nodiscard]]
 constexpr auto set (T t, B bp) noexcept -> T {
 //    if constexpr (std::is_signed_v<B>) {
 //        bit_sizeof_v<T>
@@ -77,26 +82,31 @@ constexpr auto set (T t, B bp) noexcept -> T {
 }
 
 template <typename T, typename B = std::size_t>
+[[nodiscard]]
 constexpr auto clear (T t, B bp) noexcept -> T {
     return t & toggle(0b1u << bp);
 }
 
 template <typename T, typename B = std::size_t>
+[[nodiscard]]
 constexpr auto toggle (T t, B bp) noexcept -> T {
     return t ^ (0b1u << bp);
 }
 
 template <typename T, typename B = std::size_t>
+[[nodiscard]]
 constexpr auto is_set (T t, B bp) noexcept -> T {
     return (t & (0b1u << bp)) != 0;
 }
 
 template <typename T, typename B = std::size_t>
+[[nodiscard]]
 constexpr auto is_clear (T t, B bp) noexcept -> T {
     return (t & (0b1u << bp)) == 0;
 }
 
 template <typename T>
+[[nodiscard]]
 constexpr auto mask (std::size_t nb = 0u) noexcept -> T {
     static_assert(traits::is_integral_v<T>);
     auto m = T{};

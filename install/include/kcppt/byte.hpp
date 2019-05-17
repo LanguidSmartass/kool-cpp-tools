@@ -65,6 +65,8 @@ private:
     }
 
 public:
+    constexpr byte () noexcept : _enum_v(0) {}
+    
     template <
         typename IntegerType,
         std::enable_if_t<std::is_integral_v<IntegerType>>* = nullptr

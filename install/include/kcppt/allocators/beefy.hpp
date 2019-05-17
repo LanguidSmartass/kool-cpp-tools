@@ -60,6 +60,8 @@
  *        32 bit    1 + 4 + 4 == 9
  *        64 bit    1 + 8 + 8 == 17
  *
+ *        Also the alignment overhead might kick in.
+ *
  *        This is the price you pay for O(logN) allocation and deallocation.
  *
  *        The second price you pay is pure abstract interface indirection so
@@ -110,8 +112,9 @@
 #ifndef KCPPT_ALLOCATORS_BEEFY_HPP
 #define KCPPT_ALLOCATORS_BEEFY_HPP
 
-#include "../range.hpp"
-#include "../c_array.hpp"
+#include "../kcppt/range.hpp"
+#include "../kcppt/c_array.hpp"
+#include "../kcppt/align.hpp"
 
 #include <array>
 #include <cinttypes>
@@ -192,10 +195,12 @@ template <std::size_t TBlockSize, std::size_t TBlocksCount>
 class storage final : public storage_base {
     static_assert(TBlockSize != 0);
     static_assert(TBlocksCount != 0);
-
+    
+    constexpr static auto _AlignedTBlockSize = align::align_up(TBlockSize);
+    
 private:
-    c_array::c_array<std::uint8_t, TBlockSize * TBlocksCount> _pool_of_bytes;
-//    std::uint8_t _pool_of_T[TBlockSize * TBlocksCount];
+    c_array::c_array<std::uint8_t, _AlignedTBlockSize * TBlocksCount> _pool_of_bytes;
+//    std::uint8_t _pool_of_T[_AlignedTBlockSize * TBlocksCount];
     
     /******
      * @brief _heap_flags, _heap_pointers and _heap_indices are a part of a
@@ -238,7 +243,7 @@ public:
         ),
         _sorted_pointers(
             _implementation::build_pointers_array<void, TBlocksCount>
-                (_pool_of_bytes, TBlockSize)
+                (_pool_of_bytes, _AlignedTBlockSize)
         ) {}
     
     ~storage () noexcept final = default;
@@ -246,7 +251,7 @@ public:
 public:
     [[nodiscard]]
     auto block_size () const noexcept -> std::size_t final {
-        return TBlockSize;
+        return _AlignedTBlockSize;
     }
     
     [[nodiscard]]

@@ -153,6 +153,10 @@ constexpr static auto is_floating_point_v = std::is_floating_point_v<V>;
 template <typename V>
 constexpr static auto is_function_v = std::is_function_v<V>;
 
+
+
+
+
 }
 
 }
