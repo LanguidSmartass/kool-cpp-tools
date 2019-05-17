@@ -41,23 +41,35 @@ namespace kcppt {
 
 namespace log2 {
 
-template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+/**
+ * @brief Return a log2(t) the pow2 of which is is greater than or equal to t
+ * @tparam T deduced integral type
+ * @param t given number
+ * @return log2(t), rounded up if t is not already is a power of 2
+ */
+template <typename T, typename = util::enable_if_integral_t<T>>
 [[nodiscard]]
-constexpr auto greater_equal (T&& t) noexcept -> std::intmax_t {
-    if (t == 0u)
+constexpr auto log2_ge (T t) noexcept -> std::intmax_t {
+    if (t == 0)
         return std::numeric_limits<std::intmax_t>::min();
     
-    auto is_pow2 = pow2::is_pow2(std::forward<T>(t));
-    return bitwise::rshift_count<T, 0, -1>(std::forward<T>(t)) + !is_pow2;
+    auto is_pow2 = pow2::is_pow2(t);
+    return bitwise::rshift_count<T, 0, -1>(t) + !is_pow2;
 }
 
-template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+/**
+ * @brief Return a log2(t) the pow2 of which is is less than or equal to t
+ * @tparam T deduced integral type
+ * @param t given number
+ * @return log2(t), rounded down if t is not already is a power of 2
+ */
+template <typename T, typename = util::enable_if_integral_t<T>>
 [[nodiscard]]
-constexpr auto less_equal (T&& t) noexcept -> std::intmax_t {
-    if (t == 0u)
+constexpr auto log2_le (T t) noexcept -> std::intmax_t {
+    if (t == 0)
         return std::numeric_limits<std::intmax_t>::min();
     
-    return bitwise::rshift_count<T, 0, -1>(std::forward<T>(t));
+    return bitwise::rshift_count<T, 0, -1>(t);
 }
 
 }
