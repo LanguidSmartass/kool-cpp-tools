@@ -19,8 +19,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
- 
- if ("${install-path}" STREQUAL "")
+
+if ("${install-path}" STREQUAL "")
     message(FATAL_ERROR "Provide 'install-path' variable!")
 endif()
 
@@ -36,7 +36,7 @@ set(
 
 set(
     headers-root-sources
-    ${CMAKE_CURRENT_LIST_DIR}/headers
+    ${CMAKE_CURRENT_LIST_DIR}/include
 )
 
 set(
@@ -52,28 +52,29 @@ add_library(
 target_include_directories(
     ${library-name}
     INTERFACE
-    $<BUILD_INTERFACE:${headers-root-sources}> # for 'building', even thought there is nothing to build
+    $<BUILD_INTERFACE:${headers-root-sources}>
     $<INSTALL_INTERFACE:${public-header-root-interface-path}>
 )
 
-include(files-list.cmake)
-string(REPLACE "PREFIX_DIR" "${headers-root-sources}" headers-list-sources "${headers-list-template}")
-string(REPLACE "PREFIX_DIR" "${headers-root-install}" headers-list-install "${headers-list-template}")
-# message("headers-list-sources:  ${headers-list-sources}")
-# message("headers-list-install:  ${headers-list-install}")
+include(include/kcppt/headers.cmake)
+
+set(headers-list-sources ${headers-list-template})
+set(headers-list-install ${headers-list-template})
+
+function(list_prepend input_list prefix)
+    set(output_list "")
+    foreach(item ${${input_list}})
+        list(APPEND output_list "${prefix}${item}")
+    endforeach()
+    set(${input_list} ${output_list} PARENT_SCOPE)
+endfunction()
+
+list_prepend(headers-list-sources "${headers-root-sources}/")
+list_prepend(headers-list-install "${headers-root-install}/")
 
 set_property(
     TARGET ${library-name}
     PROPERTY INTERFACE_SOURCES ${headers-list-install}
-)
-
-target_link_libraries(
-    ${library-name}
-    INTERFACE
-    extra-templates
-    ipcore
-    vend-spec-tables
-#    xil-bsp
 )
 
 install(
@@ -99,7 +100,7 @@ install(
     ${public-cmake-package-config-path}
 )
 
-unset(public-header-root-interface-path)
-unset(public-cmake-package-config-path)
-unset(headers-list)
-unset(headers-root)
+#unset(public-header-root-interface-path)
+#unset(public-cmake-package-config-path)
+#unset(headers-root-sources)
+#unset(headers-list-install)
