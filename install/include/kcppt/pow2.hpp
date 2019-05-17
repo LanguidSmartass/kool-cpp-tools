@@ -34,21 +34,19 @@
 #define KCPPT_POW2_HPP
 
 #include "bitwise.hpp"
+#include "util.hpp"
 
-#include <utility>
+namespace kcppt::pow2 {
 
-namespace kcppt {
-
-namespace pow2 {
-
+/**
+ * @brief Determine whether the number is a power of 2 or not
+ * @tparam T deduced integral type
+ * @param t value to test
+ * @return true if power of 2, false otherwise
+ */
+template <typename T, typename = util::enable_if_integral_t<T>>
 [[nodiscard]]
-constexpr auto pow2 (std::size_t n) noexcept -> std::uintmax_t {
-    return 1u << n;
-}
-
-template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
-[[nodiscard]]
-constexpr auto is_pow2 (T&& t) noexcept -> bool {
+constexpr auto is_pow2 (T t) noexcept -> bool {
     /// all negative values are not powers of 2
     /// zero technically is a power of 2, but the exponent is negative infinity
     /// positive numbers can be powers of 2
@@ -58,35 +56,35 @@ constexpr auto is_pow2 (T&& t) noexcept -> bool {
 }
 
 /**
- * @brief
- * @tparam T
- * @param t
- * @return
+ * @brief Get the next number that is a power of 2 and is greater than
+ *        or equal to t
+ * @tparam T deduced integral type
+ * @param t original value
+ * @return next greater or equal power of 2
  */
-template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+template <typename T, typename = util::enable_if_integral_t<T>>
 [[nodiscard]]
-constexpr auto greater_equal (T&& t) noexcept -> T {
-    if (is_pow2(std::forward<T>(t))) {
+constexpr auto pow2_ge (T t) noexcept -> T {
+    if (is_pow2(t)) {
         return t;
     }
-    return t << (bitwise::rshift_count<T, 1, 0>(std::forward<T>(t)) + 1u);
+    return 1 << (bitwise::rshift_count<T, 1, 0>(t) + 1u);
 }
 
 /**
- * @brief
- * @tparam T
- * @param t
- * @return
+ * @brief Get the next number that is a power of 2 and is less than
+ *        or equal to t
+ * @tparam T deduced integral type
+ * @param t original value
+ * @return next less or equal power of 2
  */
-template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+template <typename T, typename = util::enable_if_integral_t<T>>
 [[nodiscard]]
-constexpr auto less_equal (T&& t) noexcept -> T {
-    if (is_pow2(std::forward<T>(t))) {
+constexpr auto pow2_le (T&& t) noexcept -> T {
+    if (is_pow2(t)) {
         return t;
     }
-    return t << bitwise::rshift_count<T, 1, 0>(std::forward<T>(t));
-}
-
+    return 1 << bitwise::rshift_count<T, 1, 0>(t);
 }
 
 }
