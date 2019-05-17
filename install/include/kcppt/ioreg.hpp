@@ -68,14 +68,12 @@
 #ifndef KCPPT_IOREG_HPP
 #define KCPPT_IOREG_HPP
 
-#include "align.hpp"
-
 #include <cinttypes>
 #include <type_traits>
 
-namespace kcppt {
+#include "align.hpp"
 
-namespace ioreg {
+namespace kcppt::ioreg {
 
 namespace _implementation {
 
@@ -103,11 +101,11 @@ template <
 >
 class [[nodiscard]] accessor {
 private:
-    using _select_type = select_addressed_type_t<Address, T>;
-    static_assert(!std::is_void_v<_select_type>);
+    using _addressed_type = select_addressed_type_t<Address, T>;
+    static_assert(!std::is_void_v<_addressed_type>);
 
 public:
-    using type = _select_type;
+    using type = _addressed_type;
 
 public:
     constexpr accessor () noexcept = default;
@@ -134,13 +132,26 @@ using pointer = accessor<Pointer>;
 
 }
 
+/**
+ * @brief  Wrapper class template mainly for accessing 'registers' of various
+ *         hardware ip cores. This way you can get away from manually
+ *         dereferencing raw addresses or using global macro expressions.
+ *
+ * @tparam IO a class with 1 public type named 'type' and 2 member functions
+ *         'read' and 'write'.
+ *         'type' must be an integral type, for example std::uint32_t
+ *         Signatures of the member functions must be the following, where 'i'
+ *         is a bit position with a default argument = 0:
+ *         auto read (std::size_t i = 0u) const noexcept -> type;
+ *         auto write (type v, std::size_t i = 0u) const noexcept -> void;
+ */
 template <class IO>
 class reg_single {
 private:
     static_assert(traits::is_class_v<IO>);
     using _io_type = typename IO::type;
-//    constexpr static auto a = debug::display_type_inside_incomplete_type_error(_io_type());
     static_assert(traits::is_integral_or_pointer_v<_io_type>);
+    
 private:
     constexpr static auto _access = IO();
     const std::size_t _i;
@@ -162,7 +173,7 @@ public:
     
 public:
     constexpr explicit reg_single (std::size_t i = 0) noexcept : _i(i) {}
-
+    
 public:
     /**
      * @brief Intentional implicit conversion to the underlying type W
@@ -171,63 +182,126 @@ public:
     [[nodiscard]]
     operator type () const noexcept { return _read(); }
     
+    /**
+     * @brief
+     * @param w
+     * @return
+     */
     [[nodiscard]]
     auto operator& (type w) const noexcept -> type {
         return _read() & w;
     }
     
+    /**
+     * @brief
+     * @param w
+     * @return
+     */
     [[nodiscard]]
     auto operator| (type w) const noexcept -> type {
         return _read() | w;
     }
     
+    /**
+     * @brief
+     * @param w
+     * @return
+     */
     [[nodiscard]]
     auto operator^ (type w) const noexcept -> type {
         return _read() ^ w;
     }
     
+    /**
+     * @brief
+     * @return
+     */
     [[nodiscard]]
     auto operator~ () const noexcept -> type {
         return ~_read();
     }
     
+    /**
+     * @brief
+     * @param n
+     * @return
+     */
+    template <typename S, util::enable_if_integral_t<S>* = nullptr>
     [[nodiscard]]
-    auto operator>> (std::size_t n) const noexcept -> type {
-        return _read() >> n;
-    }
-    
-    [[nodiscard]]
-    auto operator<< (std::size_t n) const noexcept -> type {
+    auto operator<< (S n) const noexcept -> type {
         return _read() << n;
     }
     
+    /**
+     * @brief
+     * @param n
+     * @return
+     */
+    template <typename S, util::enable_if_integral_t<S>* = nullptr>
+    [[nodiscard]]
+    auto operator>> (S n) const noexcept -> type {
+        return _read() >> n;
+    }
+    
+    /**
+     * @brief
+     * @param w
+     * @return
+     */
     auto operator= (type w) const noexcept -> const reg_single& {
         _write(w);
         return *this;
     }
     
+    /**
+     * @brief
+     * @param w
+     * @return
+     */
     auto operator&= (type w) const noexcept -> const reg_single& {
         _write(*this & w);
         return *this;
     }
     
+    /**
+     * @brief
+     * @param w
+     * @return
+     */
     auto operator|= (type w) const noexcept -> const reg_single& {
         _write(*this | w);
         return *this;
     }
     
+    /**
+     * @brief
+     * @param w
+     * @return
+     */
     auto operator^= (type w) const noexcept -> const reg_single& {
         _write(*this ^ w);
         return *this;
     }
     
-    auto operator>>= (std::size_t n) const noexcept -> const reg_single& {
-        _write(*this >> n);
+    /**
+     * @brief
+     * @param n
+     * @return
+     */
+    template <typename S, util::enable_if_integral_t<S>* = nullptr>
+    auto operator<<= (S n) const noexcept -> const reg_single& {
+        _write(*this << n);
         return *this;
     }
     
-    auto operator<<= (std::size_t n) const noexcept -> const reg_single& {
-        _write(*this << n);
+    /**
+     * @brief
+     * @param n
+     * @return
+     */
+    template <typename S, util::enable_if_integral_t<S>* = nullptr>
+    auto operator>>= (S n) const noexcept -> const reg_single& {
+        _write(*this >> n);
         return *this;
     }
     
@@ -304,8 +378,6 @@ using rb_saddr = reg_bank_signed_address<Address, W, BankSize>;
 
 template <auto Pointer, std::size_t BankSize>
 using rb_ptr = reg_bank_pointer<Pointer, BankSize>;
-
-}
 
 }
 
