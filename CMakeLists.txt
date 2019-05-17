@@ -27,7 +27,7 @@
 # SOFTWARE.
 #
 # @brief CMake package main file for kool-cpp-tool library
-# kcppt is an abbreviation, obviously
+# kcppt is an acronym, obviously
 
 cmake_minimum_required(VERSION 3.13)
 
@@ -52,15 +52,8 @@ message("Library name: ${library-name}")
 set(CMAKE_NO_SYSTEM_FROM_IMPORTED ON)
 #####################################
 
-if (testing)
-    set(install-path "A:/garbage")
-endif()
-
 add_subdirectory(install)
-
-if (testing)
-    include(tests/tests.cmake)
-endif()
+add_subdirectory(tests)
 
 unset(package-config-file)
 unset(project-name)
