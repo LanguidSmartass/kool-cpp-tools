@@ -39,6 +39,7 @@
 #include <cinttypes>
 #include <type_traits>
 #include <utility>
+#include <iostream>
 
 namespace kcppt {
 
@@ -48,6 +49,8 @@ template <bool IsSigned = true>
 class alignas(1u) [[nodiscard]] byte  {
 private:
     using _int_type = std::conditional_t<IsSigned, std::int8_t, std::uint8_t>;
+    using _display_type = std::conditional_t<IsSigned, int, unsigned int>;
+    
     struct _enum {
         enum type : _int_type {};
     };
@@ -65,7 +68,7 @@ private:
     }
 
 public:
-    constexpr byte () noexcept : _enum_v(0) {}
+    constexpr byte () noexcept : _enum_v(static_cast<_enum_type>(0)) {}
     
     template <
         typename IntegerType,
@@ -108,45 +111,45 @@ public:
 
 public:
     
-    template <typename IntegerType>
-    constexpr auto operator+= (IntegerType i) noexcept -> byte& {
+    template <typename T>
+    constexpr auto operator+= (T i) noexcept -> byte& {
         _enum_v = _to_enum(_to_int(_enum_v) + i);
         return *this;
     }
     
-    template <typename IntegerType>
-    constexpr auto operator-= (IntegerType i) noexcept -> byte& {
+    template <typename T>
+    constexpr auto operator-= (T i) noexcept -> byte& {
         _enum_v = _to_enum(_to_int(_enum_v) - i);
         return *this;
     }
     
-    template <typename IntegerType>
+    template <typename T>
     [[nodiscard]]
-    constexpr auto operator+ (IntegerType i) noexcept -> byte {
+    constexpr auto operator+ (T i) noexcept -> T {
         return { _to_int(_enum_v) + i };
     }
     
-    template <typename IntegerType>
+    template <typename T>
     [[nodiscard]]
-    constexpr auto operator- (IntegerType i) noexcept -> byte {
+    constexpr auto operator- (T i) noexcept -> T {
         return { _to_int(_enum_v) - i };
     }
     
-    template <typename IntegerType>
+    template <typename T>
     [[nodiscard]]
-    constexpr auto operator* (IntegerType i) noexcept -> byte {
+    constexpr auto operator* (T i) noexcept -> T {
         return { _to_int(_enum_v) * i };
     }
     
-    template <typename IntegerType>
+    template <typename T>
     [[nodiscard]]
-    constexpr auto operator/ (IntegerType i) noexcept -> byte {
+    constexpr auto operator/ (T i) noexcept -> T {
         return { _to_int(_enum_v) / i };
     }
     
-    template <typename IntegerType>
+    template <typename T>
     [[nodiscard]]
-    constexpr auto operator% (IntegerType i) noexcept -> byte {
+    constexpr auto operator% (T i) noexcept -> T {
         return { _to_int(_enum_v) % i };
     }
     
@@ -209,7 +212,15 @@ public:
         return { ~_to_int(_enum_v) };
     }
     
+    template <bool IsSignedCout>
+    friend auto operator<< (std::ostream& out, const byte<IsSignedCout>& b)
+    -> std::ostream&;
 };
+
+template <bool IsSigned>
+auto operator<< (std::ostream& out, const byte<IsSigned>& b) -> std::ostream& {
+    return out << static_cast<typename byte<IsSigned>::_display_type>(b._enum_v);
+}
 
 /** ARITHMETIC */
 template <typename IntegerType, bool IsSigned>
@@ -283,6 +294,12 @@ noexcept -> IntegerType& {
 template <typename IntegerType, bool IsSigned>
 [[nodiscard]]
 static auto operator== (IntegerType i, byte<IsSigned> b) noexcept {
+    return i == static_cast<IntegerType>(b);
+}
+
+template <typename IntegerType, bool IsSigned>
+[[nodiscard]]
+static auto operator== (byte<IsSigned> b, IntegerType i) noexcept {
     return i == static_cast<IntegerType>(b);
 }
 
