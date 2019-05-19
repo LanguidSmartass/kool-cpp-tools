@@ -36,10 +36,10 @@ list(
     io/out_str_and_int.hpp
 
     align.hpp
-    ascii.hpp
     bitwise.hpp
     byte.hpp
     c_array.hpp
+    c_string.hpp
     debug.hpp
     endian.hpp
     ioreg.hpp
