@@ -31,3 +31,11 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+using kcppt::ascii::is_c_string;
+
+TEST(ascii_test, is_c_string_default) {
+    constexpr auto str = "I am a basic ASCII C-string";
+    constexpr auto len = c_string::strlen(str);
+    printf("c_string: %u\n", len);
+//    ASSERT_TRUE(is_c_string(str, len));
+}
