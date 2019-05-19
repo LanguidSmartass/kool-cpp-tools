@@ -9,7 +9,11 @@ add_executable(
     src/main.cpp
     src/ioreg/single.cpp
     src/ioreg/bank.cpp
-    src/pow2/pow2.cpp src/log2/log2.cpp)
+    src/pow2/pow2.cpp
+    src/log2/log2.cpp
+    src/c_string/c_string.cpp
+    src/byte/byte.cpp
+)
 
 # link the sources of this library to test
 include_directories(
