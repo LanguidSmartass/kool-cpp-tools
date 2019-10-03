@@ -28,7 +28,6 @@
 
 #include <kcppt/byte.hpp>
 #include <kcppt/traits.hpp>
-#include <kcppt/debug.hpp>
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>

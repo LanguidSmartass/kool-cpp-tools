@@ -13,7 +13,7 @@ add_executable(
     src/log2/log2.cpp
     src/c_string/c_string.cpp
     src/byte/byte.cpp
-)
+    src/allocators/beefy/beefy.cpp src/functional/functional.cpp src/smart_enum/smart_enum.cpp)
 
 # link the sources of this library to test
 include_directories(
