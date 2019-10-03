@@ -91,7 +91,7 @@ noexcept -> std::size_t {
 /**
  * @brief
  */
-using is_condition_f = bool (*)(char);
+using is_condition_f = auto (*)(char) -> bool;
 
 [[nodiscard]]
 constexpr auto is_ascii (char c) noexcept {
