@@ -35,6 +35,8 @@ list(
     io/printf/str_and_int.hpp
     io/out_str_and_int.hpp
 
+    serial/serial.hpp
+    
     align.hpp
     bitwise.hpp
     byte.hpp
@@ -42,12 +44,14 @@ list(
     c_string.hpp
     debug.hpp
     endian.hpp
+    functional.hpp
     ioreg.hpp
     log2.hpp
     mathrel.hpp
     pow2.hpp
     range.hpp
     sequence.hpp
+    smart_enum.hpp
     traits.hpp
     util.hpp
 )
