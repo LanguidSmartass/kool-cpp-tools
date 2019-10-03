@@ -35,9 +35,7 @@
 
 #include "util.hpp"
 
-namespace kcppt {
-
-namespace align {
+namespace kcppt::align {
 
 template <
     auto Address,
@@ -121,8 +119,6 @@ constexpr static auto align_down (
     if (is_aligned(address))
         return address;
     return address - (address % sizeof(std::uintptr_t));
-}
-
 }
 
 }
