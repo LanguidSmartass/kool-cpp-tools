@@ -71,4 +71,4 @@ using type = typename traits<C>::type;
 
 }
 
-#endif /// KCPPT_ARRAY_HPP
+#endif /// KCPPT_C_ARRAY_HPP
