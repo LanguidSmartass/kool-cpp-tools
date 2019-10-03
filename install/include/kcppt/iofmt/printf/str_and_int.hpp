@@ -35,7 +35,7 @@
 
 #include "../common/conversion_table.hpp"
 #include "../common/conversion.hpp"
-#include "../../kcppt/util.hpp"
+#include "../../util.hpp"
 
 #include <cstdarg>
 
