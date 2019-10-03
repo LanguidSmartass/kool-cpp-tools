@@ -112,9 +112,9 @@
 #ifndef KCPPT_ALLOCATORS_BEEFY_HPP
 #define KCPPT_ALLOCATORS_BEEFY_HPP
 
-#include "../kcppt/range.hpp"
-#include "../kcppt/c_array.hpp"
-#include "../kcppt/align.hpp"
+#include "../range.hpp"
+#include "../c_array.hpp"
+#include "../align.hpp"
 
 #include <array>
 #include <cinttypes>
