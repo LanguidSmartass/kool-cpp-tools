@@ -4,9 +4,8 @@
  * @email  jedi.orden@gmail.com
  * @date   24.09.2019
  * 
- * @brief  Everything to do with functors and lambdas
- *         i.e. what has operator() inside it
- * 
+ * @brief  Everything to do with function signatures, functors and lambdas
+ *         i.e. what has operator() inside it.
  */
 
 #ifndef KCPPT_FUNCTIONAL_HPP
