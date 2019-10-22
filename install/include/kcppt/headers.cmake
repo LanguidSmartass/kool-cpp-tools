@@ -50,6 +50,7 @@ list(
     mathrel.hpp
     pow2.hpp
     range.hpp
+    regular_obj.hpp
     sequence.hpp
     smart_enum.hpp
     traits.hpp
