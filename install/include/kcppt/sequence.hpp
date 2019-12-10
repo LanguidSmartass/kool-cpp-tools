@@ -147,6 +147,45 @@ struct [[nodiscard]] sequence {
 template <std::size_t...Ss>
 using index_sequence = sequence<std::size_t, Ss...>;
 
+namespace impl {
+
+template <class SequenceContainer0, class SequenceContainer1>
+struct merge_with_offset;
+
+template <std::size_t...DeducedIndices0, std::size_t...DeducedIndices1>
+struct merge_with_offset<
+    index_sequence<DeducedIndices0...>
+    , index_sequence<DeducedIndices1...>
+> {
+    using type = index_sequence<
+        DeducedIndices0...
+        , (sizeof...(DeducedIndices0) + DeducedIndices1)...
+    >;
+};
+
+}
+
+template <std::size_t N>
+struct make_index_sequence {
+    using type = typename impl::merge_with_offset<
+        typename make_index_sequence<N/2>::type
+        , typename make_index_sequence<N - N/2>::type
+    >::type;
+};
+
+template <>
+struct make_index_sequence<1>  {
+    using type = index_sequence<0>;
+};
+
+template <>
+struct make_index_sequence<0> {
+    using type = index_sequence<>;
+};
+
+template <std::size_t N>
+using make_index_sequence_t = typename make_index_sequence<N>::type;
+
 template <typename T, class SequenceContainer, T Append>
 using push_back = typename _impl::_push_back<T, SequenceContainer, Append>::type;
 

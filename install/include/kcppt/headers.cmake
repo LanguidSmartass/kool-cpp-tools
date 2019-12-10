@@ -41,7 +41,9 @@ list(
     bitwise.hpp
     byte.hpp
     c_array.hpp
+    c_file.hpp
     c_string.hpp
+    contiguous_array.hpp
     debug.hpp
     endian.hpp
     functional.hpp
@@ -50,6 +52,7 @@ list(
     mathrel.hpp
     pow2.hpp
     range.hpp
+    rate.hpp
     regular_obj.hpp
     sequence.hpp
     smart_enum.hpp

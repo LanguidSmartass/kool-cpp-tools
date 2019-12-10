@@ -43,6 +43,7 @@ union endian {
 private:
     std::uint16_t _word;
     std::uint8_t _bytes[sizeof(_word)];
+    
 public:
     constexpr endian () noexcept : _word(0x0201u) {}
     

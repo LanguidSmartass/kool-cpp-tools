@@ -40,7 +40,7 @@ namespace kcppt::align {
 template <
     auto Address,
     typename AlignmentType = std::uintptr_t,
-    util::enable_if_integral_t<decltype(Address)>* = nullptr
+    std::enable_if_t<std::is_integral_v<decltype(Address)>>* = nullptr
 >
 [[nodiscard]]
 constexpr static auto is_aligned () noexcept {
@@ -50,7 +50,7 @@ constexpr static auto is_aligned () noexcept {
 template <
     auto Pointer,
     typename AlignmentType = std::uintptr_t, /// unused
-    util::enable_if_pointer_t<decltype(Pointer)>* = nullptr
+    std::enable_if_t<std::is_pointer_v<std::remove_reference_t<decltype(Pointer)>>>* = nullptr
 >
 [[nodiscard]]
 constexpr static auto is_aligned () noexcept {

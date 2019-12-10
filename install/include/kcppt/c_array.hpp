@@ -59,13 +59,13 @@ struct traits<c_array<T, Sz>> {
 };
 
 template <typename C>
-constexpr static auto size = traits<C>::size;
+constexpr static auto size_v = traits<C>::size;
 
 template <typename C>
-using value_type = typename traits<C>::value_type;
+using value_type_t = typename traits<C>::value_type;
 
 template <typename C>
-using type = typename traits<C>::type;
+using type_t = typename traits<C>::type;
 
 }
 

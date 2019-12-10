@@ -47,13 +47,14 @@ class type_debugger;
 
 /**
  * @brief Displays a compilation error message so you can look what your
- *        resulting type T is. Use for metaprogramming debugging.
+ *        resulting type T is. Use for type debugging.
  * @tparam T any type
  * @param t instance of any type
  */
+
 template <typename T>
-constexpr auto display_type_inside_incomplete_type_error (const T&) noexcept {
-    type_debugger<T> t;
+constexpr auto display_type_inside_incomplete_type_error (T&& t) noexcept {
+    type_debugger<T> tt;
     return false;
 }
 

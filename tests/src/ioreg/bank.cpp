@@ -28,9 +28,23 @@
 
 #include <kcppt/ioreg.hpp>
 #include <kcppt/range.hpp>
+#include <kcppt/debug.hpp>
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+
+constexpr static auto _bank_size = 5;
+constexpr static std::uint32_t _default_values [_bank_size] {
+    42, 1337, 0xFACE0FF, 0xB00B135, 0xDEFEC8ED
+};
+/// Represents a bank of registers of some device with memory-mapped IO
+static std::uint32_t _bank_raw [_bank_size];
+
+//using access_t = kcppt::ioreg::_implementation::accessor<_bank_raw>;
+//constexpr static auto dbg = kcppt::debug::display_type_inside_incomplete_type_error(access_t{});
+//static_assert(std::is_same_v<void, access_t>);
+//using _obj_type = kcppt::ioreg::rb_ptr<_bank_raw, _bank_size>;
+//using _raw_type = typename _obj_type::type;
 
 class ioreg_bank_test : public ::testing::Test {
 protected:
@@ -42,22 +56,23 @@ protected:
      * @brief raw memory under test
      */
     static std::uint32_t _bank_raw [_bank_size];
-    
+
     /**
      * @brief type alias
      */
     using _obj_type = kcppt::ioreg::rb_ptr<_bank_raw, _bank_size>;
     using _raw_type = _obj_type::type;
-    
+    //constexpr static auto c  =  kcppt::debug::display_type_inside_incomplete_type_error<std::decay_t<decltype(_bank_raw)>>({});
+//    constexpr static auto cc  =  kcppt::debug::display_type_inside_incomplete_type_error<typename _obj_type::type>({});
     /**
      * @brief class template instance under test
      */
     _obj_type _bank_obj;
-    
+
     ioreg_bank_test () = default;
-    
+
     virtual ~ioreg_bank_test () noexcept = default;
-    
+
     /**
      * @brief setup the default value
      */
@@ -66,9 +81,9 @@ protected:
             _bank_raw[i] = _default_values[i];
         }
     }
-    
+
     auto TearDown () -> void override {}
-    
+
 };
 
 std::uint32_t ioreg_bank_test::_bank_raw[] {};
@@ -88,3 +103,4 @@ TEST_F(ioreg_bank_test, operator_subscript) {
         ASSERT_EQ(_bank_raw[i], _bank_obj[i]);
     }
 }
+

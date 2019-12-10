@@ -11,4 +11,6 @@
 #ifndef KCPPT_WIN32_HPP
 #define KCPPT_WIN32_HPP
 
+#include <Windows.h>
+
 #endif /// KCPPT_WIN32_HPP

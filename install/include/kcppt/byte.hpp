@@ -39,7 +39,6 @@
 #include <cinttypes>
 #include <type_traits>
 #include <utility>
-#include <iostream>
 
 namespace kcppt {
 
@@ -212,15 +211,7 @@ public:
         return { ~_to_int(_enum_v) };
     }
     
-    template <bool IsSignedCout>
-    friend auto operator<< (std::ostream& out, const byte<IsSignedCout>& b)
-    -> std::ostream&;
 };
-
-template <bool IsSigned>
-auto operator<< (std::ostream& out, const byte<IsSigned>& b) -> std::ostream& {
-    return out << static_cast<typename byte<IsSigned>::_display_type>(b._enum_v);
-}
 
 /** ARITHMETIC */
 template <typename IntegerType, bool IsSigned>

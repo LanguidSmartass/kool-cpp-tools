@@ -12,8 +12,13 @@ add_executable(
     src/pow2/pow2.cpp
     src/log2/log2.cpp
     src/c_string/c_string.cpp
+    src/contiguous_array/contiguous_array.cpp
     src/byte/byte.cpp
-    src/allocators/beefy/beefy.cpp src/functional/functional.cpp src/smart_enum/smart_enum.cpp)
+    src/allocators/beefy/beefy.cpp
+    src/functional/functional.cpp
+    src/smart_enum/smart_enum.cpp
+    src/rate/rate.cpp
+)
 
 # link the sources of this library to test
 include_directories(
@@ -28,3 +33,11 @@ target_link_libraries(
     gtest
     gtest_main
 )
+
+target_compile_options(
+    ${gtests-exec-name}
+    PRIVATE
+    #-MTd
+)
+
+include(toolchain_options.cmake)

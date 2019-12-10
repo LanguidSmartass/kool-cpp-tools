@@ -12,7 +12,7 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-
+/*
 TEST(smart_enum_named, ctor_dtor) {
     using namespace kcppt::smart_enum;
     
@@ -36,3 +36,4 @@ TEST(smart_enum_named, ctor_dtor) {
     ASSERT_EQ(value1_get, value1);
     ASSERT_EQ(name1_get, name1);
 }
+*/
