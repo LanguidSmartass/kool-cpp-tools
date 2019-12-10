@@ -49,6 +49,8 @@ list(
     functional.hpp
     ioreg.hpp
     log2.hpp
+    loop_if.hpp
+    loop_switch.hpp
     mathrel.hpp
     pow2.hpp
     range.hpp
