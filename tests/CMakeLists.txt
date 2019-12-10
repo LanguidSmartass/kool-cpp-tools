@@ -18,6 +18,8 @@ add_executable(
     src/functional/functional.cpp
     src/smart_enum/smart_enum.cpp
     src/rate/rate.cpp
+    src/loop_if/loop_if.cpp
+    src/img/morph/bin_struct.cpp
 )
 
 # link the sources of this library to test
