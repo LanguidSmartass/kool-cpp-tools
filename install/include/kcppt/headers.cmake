@@ -39,6 +39,7 @@ list(
     
     align.hpp
     bitwise.hpp
+    bitset.hpp
     byte.hpp
     c_array.hpp
     c_file.hpp
@@ -58,6 +59,7 @@ list(
     regular_obj.hpp
     sequence.hpp
     smart_enum.hpp
+    std_array_nd.hpp
     traits.hpp
     util.hpp
 )

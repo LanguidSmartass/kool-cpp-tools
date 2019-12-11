@@ -20,6 +20,7 @@ add_executable(
     src/rate/rate.cpp
     src/loop_if/loop_if.cpp
     src/img/morph/bin_struct.cpp
+    src/img/filt/max_filt.cpp
 )
 
 # link the sources of this library to test

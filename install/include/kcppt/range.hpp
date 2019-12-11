@@ -40,21 +40,41 @@ namespace kcppt {
 
 namespace range {
 
+template <typename...Ts>
+struct largest_type;
+
+//template <typename T0, typename...Ts>
+//struct largest_type<T0, Ts...> {
+//    using type = typename largest_type<Ts...>::type;
+//};
+
+template <typename T0, typename T1>
+struct largest_type<T0, T1> {
+    using type = std::conditional_t<
+        sizeof(T0) >= sizeof(T1)
+        , T0
+        , T1
+    >;
+};
+
+template <typename...Ts>
+using largest_type_t = typename largest_type<Ts...>::type;
+
 template <typename T, typename F>
 class [[nodiscard]] iterator {
 private:
-    T _i;
-    T _step;
+    T m_i;
+    T m_step;
     
 private:
     friend F;
     constexpr explicit iterator (T i, T step = 1) noexcept :
-    _i(i), _step(step)
+        m_i(i), m_step(step)
     {}
 
 public:
     constexpr auto operator++ () noexcept -> iterator& {
-        _i += _step;
+        m_i += m_step;
         return *this;
     }
     
@@ -63,22 +83,22 @@ public:
         /// '<' instead of '!=' is intentional,
         /// otherwise in cases when _step is > 1 range-for loop can
         /// go past the last index of some container
-        return _i < other._i;
+        return m_i < other.m_i;
     }
     
     [[nodiscard]]
     constexpr auto operator<= (const iterator& other) noexcept -> bool {
-        return _i <= other._i;
+        return m_i <= other.m_i;
     }
     
     [[nodiscard]]
     constexpr auto operator- (const iterator& other) noexcept -> T {
-        return _i - other._i;
+        return m_i - other.m_i;
     }
     
     [[nodiscard]]
     constexpr auto operator* () noexcept -> T {
-        return _i;
+        return m_i;
     }
 };
 
@@ -102,40 +122,44 @@ private:
     using iterator = iterator<T, range>;
     
 private:
-    T _ibegin;
-    T _iend;
-    T _istep;
+    T m_ibegin;
+    T m_iend;
+    T m_istep;
     
 public:
-    explicit constexpr range (T i) noexcept : _ibegin(0), _iend(i), _istep(1) {
-        if (_iend < 0) {
-            _ibegin = _iend;
-            _iend = 0;
+    explicit constexpr range (T i) noexcept : m_ibegin(0), m_iend(i), m_istep(1) {
+        if (m_iend < 0) {
+            m_ibegin = m_iend;
+            m_iend = 0;
         }
     }
     
-    template <typename T1, typename T2 = int>
-    constexpr range (T ibegin, T1 iend, T2 istep = 1) noexcept :
-    _ibegin(ibegin), _iend(iend), _istep(istep)
+    template <typename T1, typename T2 = T1>
+    constexpr range (T ibegin, T1 iend, T2 istep = T2 { 1 }) noexcept :
+    m_ibegin { ibegin }
+    , m_iend { iend }
+    , m_istep { istep }
     {}
     
 public:
     [[nodiscard]]
     constexpr auto begin () const noexcept -> iterator {
-        return iterator(_ibegin, _istep);
+        return iterator(m_ibegin, m_istep);
     }
     
     [[nodiscard]]
     constexpr auto end () const noexcept -> iterator {
-        return iterator(_iend, _istep);
+        return iterator(m_iend, m_istep);
     }
     
     [[nodiscard]]
     constexpr auto step () const noexcept -> T {
-        return _istep;
+        return m_istep;
     }
 };
 
+template <typename T0, typename T1, typename T2 = T1>
+range (T0 ibegin, T1 iend, T2 istep = T2 { 1 }) -> range<largest_type_t<T0, T1>>;
 /**
  * @brief Take any container with methon 'size()' (or a built-in array)
  *        and return an iterable list of indices of this container's elements.
@@ -157,34 +181,34 @@ private:
     using pod_array = T[Sz];
     
 private:
-    std::size_t _ibegin;
-    std::size_t _iend;
-    std::size_t _istep;
+    std::size_t m_ibegin;
+    std::size_t m_iend;
+    std::size_t m_istep;
 
 public:
     template <typename C> //, typename = std::enable_if_t<!std::is_array_v<C>>>
     explicit constexpr indices (
         const C& c, std::size_t begin = 0u, std::size_t step = 1u
     ) noexcept :
-        _ibegin(begin), _iend(c.size()), _istep(step)
+        m_ibegin(begin), m_iend(c.size()), m_istep(step)
     {}
     
     template <typename T, std::size_t Sz>
     explicit constexpr indices (
         const pod_array<T, Sz>& a, std::size_t begin = 0u, std::size_t step = 1u
     ) noexcept :
-        _ibegin(begin), _iend(Sz), _istep(step)
+        m_ibegin(begin), m_iend(Sz), m_istep(step)
     {}
 
 public:
     [[nodiscard]]
     constexpr auto begin () const noexcept -> iterator {
-        return iterator(_ibegin, _istep);
+        return iterator(m_ibegin, m_istep);
     }
     
     [[nodiscard]]
     constexpr auto end () const noexcept -> iterator {
-        return iterator(_iend, _istep);
+        return iterator(m_iend, m_istep);
     }
 
 };

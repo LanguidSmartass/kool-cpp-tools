@@ -7,6 +7,7 @@
 
 #include "../../range.hpp"
 #include "../../c_array_nd.hpp"
+#include "../../std_array_nd.hpp"
 
 namespace kcppt::img::morph::bin_struct {
 
@@ -51,18 +52,28 @@ protected:
     constexpr static auto el_per_row_signed =
         static_cast<std::intmax_t>(el_per_row);
     
-    using range = range::range<std::size_t>;
+//    using range = range::range<std::size_t>;
 
     using value_type = bool;
     
-    template <typename T>
-    using array_1d = c_array::c_array <T, el_per_row>;
+    /// The compiler screwes the option with POD array usage,
+    /// because somewhere during constexpr evaluation the innermost
+    /// row decays into pointer, resulting in
+    /// 'out of range, 0 <= index < 1' compiler error
+    /// If std::array is used instead, each row is contained within it's own
+    /// instance and does not decay to a pointer
+    template <typename T, std::size_t N, std::size_t D = 1>
+    using array_nd_impl = std_array::std_array_nd<T, N, D>;
+//    using array_nd_impl = c_array::c_array_nd<T, N, D>;
     
     template <typename T>
-    using array_nd = c_array::c_array_nd <T, el_per_row, Rank>;
+    using array_1d = array_nd_impl <T, el_per_row>;
     
     template <typename T>
-    using subscript_array_nd = c_array::c_array_nd <T, el_per_row, Rank - 1>;
+    using array_nd = array_nd_impl <T, el_per_row, Rank>;
+    
+    template <typename T>
+    using subscript_array_nd = array_nd_impl <T, el_per_row, Rank - 1>;
     
     using bin_array_1d = array_1d <value_type>;
     
@@ -72,9 +83,9 @@ protected:
     using enable_if_t = std::enable_if_t<B>;
     
     template <typename T>
-    using enable_if_vt = enable_if_t<std::is_same_v<T, value_type>>;
+    using values_init_terminate = enable_if_t<std::is_same_v<T, value_type>>;
     template <typename T>
-    using enable_if_not_vt = enable_if_t<!std::is_same_v<T, value_type>>;
+    using values_init_recursive = enable_if_t<!std::is_same_v<T, value_type>>;
     
     /**
      * @brief a trick for 'operator[]'
@@ -97,10 +108,10 @@ protected:
     constexpr static auto make_magic_numbers () noexcept {
         auto ret = std::array<std::intmax_t, el_per_row> {};
         constexpr auto threshold = (el_per_row + 1) / 2;
-        for (auto const i : range(0, threshold)) {
+        for (auto const i : range::range(0, threshold)) {
             ret[i] = i;
         }
-        for (auto const i : range(threshold, el_per_row)) {
+        for (auto const i : range::range(threshold, el_per_row)) {
             ret[i] = el_per_row_signed - 1 - i;
         }
         return ret;
@@ -133,31 +144,62 @@ protected:
         return ret;
     }
     
+    template <typename...Ts>
+    struct debug_types;
+    template <auto...Vs>
+    struct debug_values;
+    
+    template <typename...Vs>
+    constexpr static auto debug_values_f(Vs...vs) noexcept -> void;
     /**
      * @brief
      * @param row row to handle
      * @param n number of neighbors to set as well as the center
      * @return void
      */
-    template <typename T, typename...Is, enable_if_vt<T>* = nullptr>
-    constexpr static auto recursive_set (array_1d<T>& row, Is...is) {
-        constexpr auto row_size = kcppt::c_array::size_v<bin_array_1d>;
-        auto const n = curr_neighbors_trunc(is...);
+    template <class InIt, class Fn>
+    constexpr static auto for_each (InIt First, InIt Last, Fn Func) {
+        while (First != Last) {
+            Func(*First++);
+        }
+    }
+    
+    template <class InIt, class Size, class Fn>
+    constexpr static auto for_each_n (InIt First, Size n, Fn Func) {
+        auto const Last = First + n;
+        while (First != Last) {
+            Func(*First++);
+        }
+    }
+    
+    template <typename...Is>
+    constexpr static auto values_init (bin_array_1d&& arr, Is...is) {
+        constexpr auto row_size = el_per_row;
+        auto n = curr_neighbors_trunc(is...);
         if (n < 0) {
             return;
         }
         auto const n_set = 2 * n + 1;
-        
+
         auto const begin = (row_size - 2 * n) / 2;
         auto const end   = (row_size + 2 * n + 1) / 2;
-        for (auto const i : range(begin, end)) { row[i] = true; }
+        for (auto const i : range::range(begin, end)) {
+            arr[i] = true;
+        }
     }
     
-    template <typename T, typename...Is, enable_if_not_vt<T>* = nullptr>
-    constexpr static auto recursive_set (array_1d<T>& arr, Is...is) {
+//    template <typename...Is> ///, values_init_recursive<T>* = nullptr>
+//    constexpr static auto values_init (bin_array_1d& arr, Is...is) {
+//
+//    }
+    
+    template <typename Container, typename...Is> ///, values_init_recursive<T>* = nullptr>
+    constexpr static auto values_init (Container&& arr, Is...is) {
+//        debug_types<Container>{};
+//        debug_types<decltype(m_array)>{};
         auto i = 0;
-        for (auto& subarr : arr) {
-            recursive_set(subarr, is..., i++);
+        for (auto&& subarr : arr) {
+            values_init(std::move(subarr), is..., i++);
         }
     }
     
@@ -165,7 +207,7 @@ protected:
     
 public:
     constexpr binary_structure () : m_array {} {
-        recursive_set(m_array);
+        values_init(std::move(m_array));
     }
     
     constexpr auto operator[] (std::size_t i) const noexcept
