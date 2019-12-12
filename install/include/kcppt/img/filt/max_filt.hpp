@@ -42,7 +42,7 @@ constexpr inline auto max (Container const& src, std::size_t n_neighbors = 1u) n
     
     for (auto const center : range::indices(src)) {
 
-        auto bound_left_incl  = 0;
+        auto bound_left_incl  = decltype(center){0};
         auto bound_right_excl = center + (n_neighbors + 1);
 
         if (center > n_neighbors) {

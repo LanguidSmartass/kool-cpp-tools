@@ -34,6 +34,7 @@
 #define KCPPT_RANGE_HPP
 
 #include <cinttypes>
+#include <iterator>
 #include <utility>
 
 namespace kcppt {
@@ -62,44 +63,61 @@ using largest_type_t = typename largest_type<Ts...>::type;
 
 template <typename T, typename F>
 class [[nodiscard]] iterator {
+    friend F;
 private:
     T m_i;
     T m_step;
     
-private:
-    friend F;
     constexpr explicit iterator (T i, T step = 1) noexcept :
         m_i(i), m_step(step)
     {}
 
 public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type        = T;
+    using difference_type   = T;
+    using pointer           = T*;
+    using reference         = T&;
+    using const_reference   = T const&;
+    
     constexpr auto operator++ () noexcept -> iterator& {
         m_i += m_step;
         return *this;
     }
     
+    constexpr auto operator-- () noexcept -> iterator& {
+        m_i -= m_step;
+        return *this;
+    }
+    
     [[nodiscard]]
-    constexpr auto operator!= (const iterator& other) noexcept -> bool {
+    constexpr auto operator!= (iterator const& other) noexcept -> bool {
         /// '<' instead of '!=' is intentional,
-        /// otherwise in cases when _step is > 1 range-for loop can
+        /// otherwise in cases when m_step is > 1 range-for loop can
         /// go past the last index of some container
         return m_i < other.m_i;
     }
     
     [[nodiscard]]
-    constexpr auto operator<= (const iterator& other) noexcept -> bool {
+    constexpr auto operator== (iterator const& other) noexcept -> bool {
+        return m_i == other.m_i;
+    }
+    
+    [[nodiscard]]
+    constexpr auto operator<= (iterator const& other) const noexcept -> bool {
         return m_i <= other.m_i;
     }
     
     [[nodiscard]]
-    constexpr auto operator- (const iterator& other) noexcept -> T {
+    constexpr auto operator- (iterator const& other) const noexcept -> T {
         return m_i - other.m_i;
     }
     
     [[nodiscard]]
-    constexpr auto operator* () noexcept -> T {
+    constexpr auto operator* () const noexcept -> const_reference {
         return m_i;
     }
+    
 };
 
 /**
@@ -121,7 +139,6 @@ class [[nodiscard]] range {
 private:
     using iterator = iterator<T, range>;
     
-private:
     T m_ibegin;
     T m_iend;
     T m_istep;
@@ -177,29 +194,19 @@ class [[nodiscard]] indices {
 private:
     using iterator = iterator<std::size_t, indices>;
     
-    template <typename T, std::size_t Sz>
-    using pod_array = T[Sz];
-    
 private:
     std::size_t m_ibegin;
     std::size_t m_iend;
     std::size_t m_istep;
 
 public:
-    template <typename C> //, typename = std::enable_if_t<!std::is_array_v<C>>>
+    template <typename Container>
     explicit constexpr indices (
-        const C& c, std::size_t begin = 0u, std::size_t step = 1u
+        const Container& c, std::size_t begin = 0u, std::size_t step = 1u
     ) noexcept :
-        m_ibegin(begin), m_iend(c.size()), m_istep(step)
+        m_ibegin(begin), m_iend(std::size(c)), m_istep(step)
     {}
     
-    template <typename T, std::size_t Sz>
-    explicit constexpr indices (
-        const pod_array<T, Sz>& a, std::size_t begin = 0u, std::size_t step = 1u
-    ) noexcept :
-        m_ibegin(begin), m_iend(Sz), m_istep(step)
-    {}
-
 public:
     [[nodiscard]]
     constexpr auto begin () const noexcept -> iterator {

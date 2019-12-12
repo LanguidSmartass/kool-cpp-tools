@@ -5,6 +5,9 @@
 #ifndef KCPPT_BITSET_HPP
 #define KCPPT_BITSET_HPP
 
+#include "c_array.hpp"
+#include "range.hpp"
+
 namespace kcppt::bitset {
 
 
@@ -57,8 +60,6 @@ public:
     };
 
 private:
-    using range = range<std::size_t>;
-    
     constexpr static auto n_bits = NBits;
     constexpr static auto n_bytes_per_element = sizeof(utype);
     constexpr static auto n_bits_per_elem =
@@ -88,7 +89,7 @@ private:
 
 
 public:
-    using container_t = c_array<utype, n_elements_full>;
+    using container_t = c_array::c_array<utype, n_elements_full>;
     
     constexpr bitset () noexcept : m_raw_data {} { nullify_last(); }
     
@@ -159,7 +160,7 @@ public:
         };
         utype_ptr = m_raw_data;
         auto cnt = 0u;
-        for (auto const i : range(n_bytes_full)) {
+        for (auto const i : range::range(n_bytes_full)) {
             auto const j = byte_ptr[i];
             cnt += bits_per_byte[j];
         }
@@ -230,7 +231,7 @@ public:
         
         auto const check_neighbors = [&sim, &other]
             (auto const begin, auto const end) {
-            for (auto const i : range(begin, end)) {
+            for (auto const i : range::range(begin, end)) {
                 auto const& v = other.m_container[i];
                 if (!v) {
                     continue;
@@ -243,7 +244,7 @@ public:
         
         auto const begin = bitwindow;
         auto const end = n_bits - bitwindow;
-        for (auto const i : range(begin, end)) {
+        for (auto const i : range::range(begin, end)) {
             auto const& ut = operator[](i);
             auto const& rf = other.operator[](i);
             
